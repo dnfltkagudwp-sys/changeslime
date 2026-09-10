@@ -76,6 +76,7 @@ public class SlimeStateController : MonoBehaviour
         movementScript.enabled = true;
         movementScript.SetStateModifiers(liquidMoveSpeedMultiplier, true); // 살짝 느려진 이동, 점프 가능
         movementScript.SetSquashStyle(1f, false); // 말랑말랑한 액체 느낌 (기존 스쿼시&스트레치 그대로)
+        movementScript.SetVerticalVelocityOverride(false, 0f); // 중력에 의한 정상 낙하로 복귀
         SetVisual(liquidColor);
     }
 
@@ -86,6 +87,7 @@ public class SlimeStateController : MonoBehaviour
         movementScript.enabled = true;
         movementScript.SetStateModifiers(solidMoveSpeedMultiplier, false); // 아주 느리게만 이동, 점프 불가
         movementScript.SetSquashStyle(0.1f, false); // 거의 변형되지 않아 단단한 느낌
+        movementScript.SetVerticalVelocityOverride(false, 0f); // 중력에 의한 정상 낙하로 복귀
         SetVisual(solidColor);
     }
 
@@ -96,7 +98,7 @@ public class SlimeStateController : MonoBehaviour
         movementScript.enabled = true;
         movementScript.SetStateModifiers(1f, true); // 좌우 이동은 정상 속도 유지
         movementScript.SetSquashStyle(0f, true); // 둥실둥실 떠다니는 펄스 연출로 전환
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, gasFloatSpeed); // 진입 시 한 번만 상승 속도 부여 (가속 없이 등속 상승)
+        movementScript.SetVerticalVelocityOverride(true, gasFloatSpeed); // 매 프레임 계속 상승 속도를 강제 유지 (중간에 멈추지 않도록)
         SetVisual(gasColor);
     }
 

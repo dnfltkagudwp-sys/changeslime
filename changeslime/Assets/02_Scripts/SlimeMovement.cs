@@ -5,7 +5,7 @@ public class SlimeMovement : MonoBehaviour
 {
     [Header("이동 설정")]
     [SerializeField] private float moveSpeed = 8f;
-    [SerializeField] private float jumpForce = 12f;
+    [SerializeField] private float jumpForce = 9f;
 
     [Header("바닥 판정")]
     [SerializeField] private Transform groundCheckPoint;
@@ -26,6 +26,8 @@ public class SlimeMovement : MonoBehaviour
     private bool jumpEnabled = true;
     private float squashIntensity = 1f;
     private bool useFloatyBob = false;
+    private bool verticalVelocityOverrideActive = false;
+    private float overriddenVerticalVelocity = 0f;
 
     private void Awake()
     {
@@ -61,8 +63,12 @@ public class SlimeMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // 수직 속도: 기체 상태처럼 강제 등속 부유 중이면 매 프레임 그 값을 다시 강제하고,
+        // 아니면 중력/충돌 등 평소 물리 결과(rb.linearVelocity.y)를 그대로 둠
+        float verticalVelocity = verticalVelocityOverrideActive ? overriddenVerticalVelocity : rb.linearVelocity.y;
+
         // 수평 물리 이동 (가감속 없이 반응성 좋게 이동), 상태별 배속 적용
-        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed * moveSpeedMultiplier, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed * moveSpeedMultiplier, verticalVelocity);
     }
 
     /// <summary>
@@ -72,6 +78,16 @@ public class SlimeMovement : MonoBehaviour
     {
         moveSpeedMultiplier = speedMultiplier;
         jumpEnabled = canJump;
+    }
+
+    /// <summary>
+    /// 기체 상태처럼 중력과 무관하게 일정한 수직 속도를 강제로 유지해야 할 때 SlimeStateController가 호출.
+    /// active가 false면 평소처럼 중력/충돌에 의한 수직 속도를 그대로 사용함.
+    /// </summary>
+    public void SetVerticalVelocityOverride(bool active, float velocity)
+    {
+        verticalVelocityOverrideActive = active;
+        overriddenVerticalVelocity = velocity;
     }
 
     /// <summary>

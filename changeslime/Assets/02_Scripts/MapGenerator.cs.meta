@@ -1,2 +1,17 @@
 fileFormatVersion: 2
 guid: 6e8c3198151c062409c29ba33b84484e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - groundPrefab: {fileID: 9130585056232702319, guid: fc9b3b8550f4eed4fa3352d3c0eb4d48, type: 3}
+  - liquidPrefab: {fileID: 8054196416335486419, guid: 04ce8f689d8f656449e2d2fda30b8acd, type: 3}
+  - solidPrefab: {fileID: 861280235006919517, guid: 133e7f851c438204b8783e6b7dd58f8d, type: 3}
+  - gasPrefab: {fileID: 7151893025317273675, guid: bd7210815af64b94fb5b92ad9cedd33b, type: 3}
+  - player: {instanceID: 0}
+  - targetCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
