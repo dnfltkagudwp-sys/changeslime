@@ -851,6 +851,8 @@ MonoBehaviour:
     m_Bits: 64
   visualTransform: {fileID: 0}
   stretchSpeed: 10
+  floatyBobSpeed: 3
+  floatyBobAmount: 0.08
 --- !u!114 &1064669598
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -869,6 +871,9 @@ MonoBehaviour:
   liquidColor: {r: 0.2, g: 0.9, b: 0.3, a: 1}
   solidColor: {r: 0.4, g: 0.8, b: 1, a: 1}
   gasColor: {r: 0.9, g: 0.9, b: 1, a: 0.5}
+  liquidMoveSpeedMultiplier: 0.8
+  solidMoveSpeedMultiplier: 0.3
+  gasFloatSpeed: 1.4
 --- !u!1 &1209010502
 GameObject:
   m_ObjectHideFlags: 0

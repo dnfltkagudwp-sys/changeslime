@@ -15,11 +15,17 @@ public class SlimeMovement : MonoBehaviour
     [Header("슬라임 탄성 연출 (Squash & Stretch)")]
     [SerializeField] private Transform visualTransform; // 크기가 변형될 스프라이트 오브젝트
     [SerializeField] private float stretchSpeed = 10f;
+    [SerializeField] private float floatyBobSpeed = 3f;   // 기체 상태 둥실둥실 펄스 속도
+    [SerializeField] private float floatyBobAmount = 0.08f; // 기체 상태 둥실둥실 펄스 폭
 
     private Rigidbody2D rb;
     private float horizontalInput;
     private bool isGrounded;
     private Vector3 originalScale;
+    private float moveSpeedMultiplier = 1f;
+    private bool jumpEnabled = true;
+    private float squashIntensity = 1f;
+    private bool useFloatyBob = false;
 
     private void Awake()
     {
@@ -43,8 +49,8 @@ public class SlimeMovement : MonoBehaviour
             isGrounded = Physics2D.OverlapCircle(groundCheckPoint.position, checkRadius, groundLayer);
         }
 
-        // 3. 점프 입력 (바닥에 있을 때만 가능)
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // 3. 점프 입력 (바닥에 있고, 점프가 허용된 상태일 때만 가능)
+        if (Input.GetButtonDown("Jump") && isGrounded && jumpEnabled)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
@@ -55,28 +61,62 @@ public class SlimeMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // 수평 물리 이동 (가감속 없이 반응성 좋게 이동)
-        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
+        // 수평 물리 이동 (가감속 없이 반응성 좋게 이동), 상태별 배속 적용
+        rb.linearVelocity = new Vector2(horizontalInput * moveSpeed * moveSpeedMultiplier, rb.linearVelocity.y);
+    }
+
+    /// <summary>
+    /// 슬라임 상태(액체/고체/기체)에 따라 이동 속도 배율과 점프 가능 여부를 조절하기 위해 SlimeStateController가 호출
+    /// </summary>
+    public void SetStateModifiers(float speedMultiplier, bool canJump)
+    {
+        moveSpeedMultiplier = speedMultiplier;
+        jumpEnabled = canJump;
+    }
+
+    /// <summary>
+    /// 상태별로 스쿼시&스트레치 연출의 성격을 바꾸기 위해 SlimeStateController가 호출.
+    /// squashIntensity: 속도 기반 변형의 강도 (0 = 거의 변형 없이 딱딱함, 1 = 원래의 말랑한 액체 느낌)
+    /// floatyBob: true면 속도 기반 변형 대신 위아래로 완만하게 부풀었다 줄었다 하는 둥실둥실 펄스를 사용
+    /// </summary>
+    public void SetSquashStyle(float intensity, bool floatyBob)
+    {
+        squashIntensity = Mathf.Clamp01(intensity);
+        useFloatyBob = floatyBob;
     }
 
     private void ApplySquashAndStretch()
     {
-        Vector3 targetScale = originalScale;
+        Vector3 targetScale;
 
-        // 점프로 위로 솟구칠 때: 세로로 길쭉하게 (X 축소, Y 확대)
-        if (rb.linearVelocity.y > 0.5f && !isGrounded)
+        if (useFloatyBob)
         {
-            targetScale = new Vector3(originalScale.x * 0.8f, originalScale.y * 1.25f, originalScale.z);
+            // 기체: 둥실둥실 떠다니는 느낌의 완만한 펄스 애니메이션 (속도와 무관)
+            float bob = Mathf.Sin(Time.time * floatyBobSpeed) * floatyBobAmount;
+            targetScale = new Vector3(originalScale.x * (1f - bob), originalScale.y * (1f + bob), originalScale.z);
         }
-        // 낙하 중일 때: 원래 크기로 서서히 복귀
-        else if (rb.linearVelocity.y < -0.5f && !isGrounded)
+        else
         {
-            targetScale = new Vector3(originalScale.x * 0.9f, originalScale.y * 1.1f, originalScale.z);
-        }
-        // 바닥을 기어갈 때: 살짝 납작하게 (X 확대, Y 축소)
-        else if (isGrounded && Mathf.Abs(horizontalInput) > 0.1f)
-        {
-            targetScale = new Vector3(originalScale.x * 1.15f, originalScale.y * 0.85f, originalScale.z);
+            Vector3 deformedScale = originalScale;
+
+            // 점프로 위로 솟구칠 때: 세로로 길쭉하게 (X 축소, Y 확대)
+            if (rb.linearVelocity.y > 0.5f && !isGrounded)
+            {
+                deformedScale = new Vector3(originalScale.x * 0.8f, originalScale.y * 1.25f, originalScale.z);
+            }
+            // 낙하 중일 때: 원래 크기로 서서히 복귀
+            else if (rb.linearVelocity.y < -0.5f && !isGrounded)
+            {
+                deformedScale = new Vector3(originalScale.x * 0.9f, originalScale.y * 1.1f, originalScale.z);
+            }
+            // 바닥을 기어갈 때: 살짝 납작하게 (X 확대, Y 축소)
+            else if (isGrounded && Mathf.Abs(horizontalInput) > 0.1f)
+            {
+                deformedScale = new Vector3(originalScale.x * 1.15f, originalScale.y * 0.85f, originalScale.z);
+            }
+
+            // squashIntensity로 변형 강도 조절 (고체는 0에 가까워 거의 안 변형되어 단단해 보임)
+            targetScale = Vector3.Lerp(originalScale, deformedScale, squashIntensity);
         }
 
         // 부드럽게 복원/변형

@@ -22,6 +22,11 @@ public class SlimeStateController : MonoBehaviour
     [SerializeField] private Color solidColor = new Color(0.4f, 0.8f, 1f, 1f);   // 얼음 하늘색
     [SerializeField] private Color gasColor = new Color(0.9f, 0.9f, 1f, 0.5f);   // 반투명 증기
 
+    [Header("상태별 이동/부유 튜닝")]
+    [SerializeField] private float liquidMoveSpeedMultiplier = 0.8f; // 액체 상태 이동 속도 배율 (살짝 느려짐)
+    [SerializeField] private float solidMoveSpeedMultiplier = 0.25f; // 고체 상태 이동 속도 배율 (아주 느리게 움직임, 점프는 불가)
+    [SerializeField] private float gasFloatSpeed = 1.5f;             // 기체 상태로 전환 시 위로 떠오르는 등속 속도
+
     private Rigidbody2D rb;
 
     public SlimeState CurrentState => currentState;
@@ -69,6 +74,8 @@ public class SlimeStateController : MonoBehaviour
         rb.gravityScale = 3f;       // 기본 중력
         rb.mass = 1f;               // 기본 질량
         movementScript.enabled = true;
+        movementScript.SetStateModifiers(liquidMoveSpeedMultiplier, true); // 살짝 느려진 이동, 점프 가능
+        movementScript.SetSquashStyle(1f, false); // 말랑말랑한 액체 느낌 (기존 스쿼시&스트레치 그대로)
         SetVisual(liquidColor);
     }
 
@@ -76,16 +83,20 @@ public class SlimeStateController : MonoBehaviour
     {
         rb.gravityScale = 5f;       // 강한 중력으로 급강하
         rb.mass = 5f;               // 스위치 압박용 무거운 질량
-        // 얼어붙어 제자리 점프 불가가 되도록 이동 스크립트 비활성화 (물리 미끄러짐만 유지)
-        movementScript.enabled = false;
+        movementScript.enabled = true;
+        movementScript.SetStateModifiers(solidMoveSpeedMultiplier, false); // 아주 느리게만 이동, 점프 불가
+        movementScript.SetSquashStyle(0.1f, false); // 거의 변형되지 않아 단단한 느낌
         SetVisual(solidColor);
     }
 
     private void ApplyGasState()
     {
-        rb.gravityScale = -1.5f;    // 중력 반전으로 위로 부유
+        rb.gravityScale = 0f;       // 중력 제거: 등속으로 서서히 떠오르게 함 (음수 중력은 계속 가속되어 하늘로 치솟는 문제가 있었음)
         rb.mass = 0.2f;             // 가벼운 질량
         movementScript.enabled = true;
+        movementScript.SetStateModifiers(1f, true); // 좌우 이동은 정상 속도 유지
+        movementScript.SetSquashStyle(0f, true); // 둥실둥실 떠다니는 펄스 연출로 전환
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, gasFloatSpeed); // 진입 시 한 번만 상승 속도 부여 (가속 없이 등속 상승)
         SetVisual(gasColor);
     }
 
