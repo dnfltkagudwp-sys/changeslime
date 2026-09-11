@@ -40,6 +40,7 @@ public class SlimeMovement : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        Collider2D col = GetComponent<Collider2D>();
 
         // Visual 오브젝트가 별도로 지정되지 않았다면 본체의 트랜스폼 사용
         if (visualTransform == null)
@@ -48,8 +49,11 @@ public class SlimeMovement : MonoBehaviour
         originalScale = visualTransform.localScale;
         originalLocalPosition = visualTransform.localPosition;
 
+        // 이미지마다 여백/트림/피벗이 달라 발밑이 콜라이더 바닥과 어긋날 수 있으므로,
+        // 실제 렌더링된 스프라이트 경계를 기준으로 발밑을 콜라이더 바닥에 자동으로 맞춤
+        SnapVisualToGroundBounds();
+
         // 벽에 붙어 눌린 상태로 점프할 때 마찰 때문에 상승 속도가 깎여 걸리는 문제 방지
-        Collider2D col = GetComponent<Collider2D>();
         if (col.sharedMaterial == null || col.sharedMaterial.friction != 0f)
         {
             col.sharedMaterial = new PhysicsMaterial2D("SlimeNoFriction") { friction = 0f, bounciness = 0f };
@@ -94,6 +98,22 @@ public class SlimeMovement : MonoBehaviour
     {
         moveSpeedMultiplier = speedMultiplier;
         jumpEnabled = canJump;
+    }
+
+    /// <summary>
+    /// 스프라이트가 바뀔 때(상태 전환 등)마다 SlimeStateController가 호출.
+    /// 이미지마다 여백/트림/피벗이 달라도 실제 렌더링 경계 기준으로 발밑을 콜라이더 바닥에 맞추고,
+    /// 스쿼시&스트레치가 기준으로 삼는 원점(originalLocalPosition)도 그 위치로 다시 잡음.
+    /// </summary>
+    public void SnapVisualToGroundBounds()
+    {
+        Collider2D col = GetComponent<Collider2D>();
+        SpriteRenderer sr = visualTransform.GetComponent<SpriteRenderer>();
+        if (sr == null || sr.sprite == null || col == null) return;
+
+        float bottomCorrection = col.bounds.min.y - sr.bounds.min.y;
+        visualTransform.position += new Vector3(0f, bottomCorrection, 0f);
+        originalLocalPosition = visualTransform.localPosition;
     }
 
     /// <summary>

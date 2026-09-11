@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5019ae3a9f3278443b5fcbb45a193ff9
+guid: 3f5ff9024c69ddc4aabc8e7871d824ff
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8522877737011876484
-    second: Slime_gas_final_0
+      213: -5915529270811429886
+    second: Basic_wall_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 2048
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -102,13 +102,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Slime_gas_final_0
+      name: Basic_wall_0
       rect:
         serializedVersion: 2
-        x: 27
-        y: 19
-        width: 1052
-        height: 832
+        x: 0
+        y: 0
+        width: 2048
+        height: 2048
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -117,8 +117,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c7d6255bad7a8b980800000000000000
-      internalID: -8522877737011876484
+      spriteID: 204fbd25871d7eda0800000000000000
+      internalID: -5915529270811429886
       vertices: []
       indices: 
       edges: []
@@ -137,7 +137,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Slime_gas_final_0: -8522877737011876484
+      Basic_wall_0: -5915529270811429886
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

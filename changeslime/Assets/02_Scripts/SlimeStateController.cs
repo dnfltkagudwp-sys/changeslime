@@ -124,5 +124,9 @@ public class SlimeStateController : MonoBehaviour
         {
             visualRenderer.color = fallbackColor;
         }
+
+        // 스프라이트가 바뀌었으니, 발밑이 콜라이더 바닥과 다시 맞도록 보정
+        if (movementScript != null)
+            movementScript.SnapVisualToGroundBounds();
     }
 }
