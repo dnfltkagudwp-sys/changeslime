@@ -23,11 +23,13 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject liquidPrefab; // 'L'
     [SerializeField] private GameObject solidPrefab;  // 'S'
     [SerializeField] private GameObject gasPrefab;    // 'G'
+    [SerializeField] private GameObject goalPrefab;   // 'X'
 
     [Header("플레이어 (선택, 'P' 위치로 이동시킴)")]
     [SerializeField] private Transform player;
 
     [Header("카메라 (선택, 맵 생성 후 전체가 보이도록 자동 배치)")]
+    [SerializeField] private bool autoFitCameraToMap = true; // 맵이 커서 CameraFollow로 따라다니게 할 거면 꺼두기
     [SerializeField] private Camera targetCamera; // 비워두면 Camera.main 사용
     [SerializeField] private float cameraPadding = 1f; // 맵 가장자리 여유 공간(유닛)
 
@@ -71,6 +73,9 @@ public class MapGenerator : MonoBehaviour
                     case 'G':
                         SpawnTile(gasPrefab, pos);
                         break;
+                    case 'X':
+                        SpawnTile(goalPrefab, pos);
+                        break;
                     case 'P':
                         if (player != null)
                             player.position = pos;
@@ -83,7 +88,8 @@ public class MapGenerator : MonoBehaviour
         if (mergeGroundColliders)
             SetupCompositeGroundCollider();
 
-        FitCameraToMap(mapRows);
+        if (autoFitCameraToMap)
+            FitCameraToMap(mapRows);
     }
 
     private void SpawnTile(GameObject prefab, Vector2 position)

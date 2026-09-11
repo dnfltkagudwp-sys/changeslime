@@ -18,9 +18,9 @@ public class SlimeStateController : MonoBehaviour
     [SerializeField] private SlimeMovement movementScript;
 
     [Header("상태별 시각 색상")]
-    [SerializeField] private Color liquidColor = new Color(0.2f, 0.9f, 0.3f, 1f);  // 네온 연두
-    [SerializeField] private Color solidColor = new Color(0.4f, 0.8f, 1f, 1f);   // 얼음 하늘색
-    [SerializeField] private Color gasColor = new Color(0.9f, 0.9f, 1f, 0.5f);   // 반투명 증기
+    [SerializeField] private Color liquidColor = new Color(0.2f, 0.5f, 0.95f, 1f); // 물 느낌의 진한 파랑
+    [SerializeField] private Color solidColor = new Color(0.6f, 0.85f, 1f, 1f);    // 얼음 느낌의 옅은 하늘색
+    [SerializeField] private Color gasColor = new Color(0.4f, 0.9f, 0.5f, 0.5f);   // 반투명 초록빛 증기
 
     [Header("상태별 이동/부유 튜닝")]
     [SerializeField] private float liquidMoveSpeedMultiplier = 0.8f; // 액체 상태 이동 속도 배율 (살짝 느려짐)

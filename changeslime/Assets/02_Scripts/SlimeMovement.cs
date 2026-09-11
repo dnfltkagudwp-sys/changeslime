@@ -17,6 +17,11 @@ public class SlimeMovement : MonoBehaviour
     [SerializeField] private float stretchSpeed = 10f;
     [SerializeField] private float floatyBobSpeed = 3f;   // 기체 상태 둥실둥실 펄스 속도
     [SerializeField] private float floatyBobAmount = 0.08f; // 기체 상태 둥실둥실 펄스 폭
+    [SerializeField] private float wobbleStiffness = 150f; // 액체 젤리 흔들림: 목표 모양으로 당기는 힘 (클수록 빠르게 반응)
+    [SerializeField] private float wobbleDamping = 10f;    // 액체 젤리 흔들림: 진동을 잦아들게 하는 감쇠 (작을수록 더 출렁임)
+    [SerializeField] private float crawlCycleDistance = 0.6f; // 이 거리(유닛)를 이동할 때마다 꾸물거림 한 주기
+    [SerializeField] private float crawlStretchAmount = 0.12f; // 꾸물거릴 때 늘어나고 움츠러드는 정도
+    [SerializeField] private float crawlLeanAmount = 0.05f;    // 꾸물거리는 리듬에 맞춰 이동 방향으로 살짝 쏠리는 정도
 
     private Rigidbody2D rb;
     private float horizontalInput;
@@ -29,6 +34,8 @@ public class SlimeMovement : MonoBehaviour
     private bool useFloatyBob = false;
     private bool verticalVelocityOverrideActive = false;
     private float overriddenVerticalVelocity = 0f;
+    private Vector3 scaleVelocity = Vector3.zero; // 젤리 흔들림 스프링 계산용
+    private float crawlPhase = 0f; // 이동한 거리에 비례해 진행되는 꾸물거림 주기
 
     private void Awake()
     {
@@ -112,46 +119,67 @@ public class SlimeMovement : MonoBehaviour
 
     private void ApplySquashAndStretch()
     {
-        Vector3 targetScale;
-        Vector3 targetLocalPosition = originalLocalPosition;
-
         if (useFloatyBob)
         {
-            // 기체: 둥실둥실 떠다니는 느낌의 완만한 펄스 애니메이션 (속도와 무관, 위치 보정 없이 제자리에서 부풀었다 줄었다 함)
-            float bob = Mathf.Sin(Time.time * floatyBobSpeed) * floatyBobAmount;
-            targetScale = new Vector3(originalScale.x * (1f - bob), originalScale.y * (1f + bob), originalScale.z);
+            // 기체: X/Y를 서로 다른 주파수·위상으로 흔들어서, 숨쉬듯 맞물려 부푸는 "풍선" 느낌 대신
+            // 제멋대로 일렁이는 기체 특유의 흐트러진 느낌을 냄
+            float bobX = Mathf.Sin(Time.time * floatyBobSpeed) * floatyBobAmount;
+            float bobY = Mathf.Sin(Time.time * floatyBobSpeed * 1.3f + 1.5f) * floatyBobAmount;
+            Vector3 bobScale = new Vector3(originalScale.x * (1f + bobX), originalScale.y * (1f + bobY), originalScale.z);
+
+            // 제자리에 고정되지 않고 천천히 위아래로 떠다니는 느낌 추가
+            float driftY = Mathf.Sin(Time.time * floatyBobSpeed * 0.7f) * floatyBobAmount * 0.5f;
+            Vector3 bobLocalPosition = originalLocalPosition + new Vector3(0f, driftY, 0f);
+
+            visualTransform.localScale = Vector3.Lerp(visualTransform.localScale, bobScale, Time.deltaTime * stretchSpeed);
+            visualTransform.localPosition = Vector3.Lerp(visualTransform.localPosition, bobLocalPosition, Time.deltaTime * stretchSpeed);
+
+            scaleVelocity = Vector3.zero; // 다른 상태로 돌아갔을 때 잔여 스프링 속도가 남지 않도록 초기화
+            return;
         }
-        else
+
+        Vector3 deformedScale = originalScale;
+        float leanX = 0f;
+
+        // 점프로 위로 솟구칠 때: 세로로 길쭉하게 (X 축소, Y 확대)
+        if (rb.linearVelocity.y > 0.5f && !isGrounded)
         {
-            Vector3 deformedScale = originalScale;
+            deformedScale = new Vector3(originalScale.x * 0.8f, originalScale.y * 1.25f, originalScale.z);
+        }
+        // 낙하 중일 때: 원래 크기로 서서히 복귀
+        else if (rb.linearVelocity.y < -0.5f && !isGrounded)
+        {
+            deformedScale = new Vector3(originalScale.x * 0.9f, originalScale.y * 1.1f, originalScale.z);
+        }
+        // 바닥을 기어갈 때: 자벌레/달팽이처럼 이동한 거리에 비례해 늘어났다 움츠러들었다를 반복
+        else if (isGrounded && Mathf.Abs(horizontalInput) > 0.1f)
+        {
+            crawlPhase += Mathf.Abs(rb.linearVelocity.x) * Time.deltaTime * (2f * Mathf.PI / Mathf.Max(crawlCycleDistance, 0.01f));
+            float crawl = Mathf.Sin(crawlPhase); // -1(움츠러듦) ~ 1(쭉 늘어남)
 
-            // 점프로 위로 솟구칠 때: 세로로 길쭉하게 (X 축소, Y 확대)
-            if (rb.linearVelocity.y > 0.5f && !isGrounded)
-            {
-                deformedScale = new Vector3(originalScale.x * 0.8f, originalScale.y * 1.25f, originalScale.z);
-            }
-            // 낙하 중일 때: 원래 크기로 서서히 복귀
-            else if (rb.linearVelocity.y < -0.5f && !isGrounded)
-            {
-                deformedScale = new Vector3(originalScale.x * 0.9f, originalScale.y * 1.1f, originalScale.z);
-            }
-            // 바닥을 기어갈 때: 살짝 납작하게 (X 확대, Y 축소)
-            else if (isGrounded && Mathf.Abs(horizontalInput) > 0.1f)
-            {
-                deformedScale = new Vector3(originalScale.x * 1.15f, originalScale.y * 0.85f, originalScale.z);
-            }
+            deformedScale = new Vector3(
+                originalScale.x * (1.15f + crawlStretchAmount * crawl),
+                originalScale.y * (0.85f - crawlStretchAmount * 0.6f * crawl),
+                originalScale.z);
 
-            // squashIntensity로 변형 강도 조절 (고체는 0에 가까워 거의 안 변형되어 단단해 보임)
-            targetScale = Vector3.Lerp(originalScale, deformedScale, squashIntensity);
-
-            // 발밑(바닥 닿는 면) 기준으로 앵커링: Y 스케일이 줄어들거나 늘어나도
-            // 중심(pivot) 기준으로만 늘고 줄면 밑면이 떠 보이므로, 그만큼 위치를 보정해 밑면을 고정함
-            float verticalAnchorOffset = (targetScale.y - originalScale.y) * 0.5f;
-            targetLocalPosition = originalLocalPosition + new Vector3(0f, verticalAnchorOffset, 0f);
+            // 늘어나는 타이밍에 맞춰 이동 방향으로 살짝 쏠렸다가, 움츠러들 때 따라붙는 느낌
+            leanX = crawlLeanAmount * crawl * Mathf.Sign(horizontalInput);
         }
 
-        // 부드럽게 복원/변형
-        visualTransform.localScale = Vector3.Lerp(visualTransform.localScale, targetScale, Time.deltaTime * stretchSpeed);
+        // squashIntensity로 변형 강도 조절 (고체는 0에 가까워 거의 안 변형되어 단단해 보임)
+        Vector3 targetScale = Vector3.Lerp(originalScale, deformedScale, squashIntensity);
+
+        // 액체 특유의 말랑한 젤리 흔들림: 목표 크기로 그냥 다가가는 대신 스프링처럼 살짝 지나쳤다 잦아들게 함
+        // (고체처럼 squashIntensity가 낮으면 당기는 힘도 함께 약해져 자연히 뻣뻣하고 흔들림 없는 느낌이 됨)
+        Vector3 toTarget = targetScale - visualTransform.localScale;
+        scaleVelocity += toTarget * (wobbleStiffness * squashIntensity) * Time.deltaTime;
+        scaleVelocity *= Mathf.Clamp01(1f - wobbleDamping * Time.deltaTime);
+        visualTransform.localScale += scaleVelocity * Time.deltaTime;
+
+        // 발밑(바닥 닿는 면) 기준으로 앵커링: Y 스케일이 줄어들거나 늘어나도(흔들림 도중에도)
+        // 중심(pivot) 기준으로만 늘고 줄면 밑면이 떠 보이므로, 실제 현재 스케일 기준으로 위치를 보정해 밑면을 고정함
+        float verticalAnchorOffset = (visualTransform.localScale.y - originalScale.y) * 0.5f;
+        Vector3 targetLocalPosition = originalLocalPosition + new Vector3(leanX * squashIntensity, verticalAnchorOffset, 0f);
         visualTransform.localPosition = Vector3.Lerp(visualTransform.localPosition, targetLocalPosition, Time.deltaTime * stretchSpeed);
     }
 
