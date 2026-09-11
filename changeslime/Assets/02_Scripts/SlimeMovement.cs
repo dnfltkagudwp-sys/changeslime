@@ -40,6 +40,13 @@ public class SlimeMovement : MonoBehaviour
 
         originalScale = visualTransform.localScale;
         originalLocalPosition = visualTransform.localPosition;
+
+        // 벽에 붙어 눌린 상태로 점프할 때 마찰 때문에 상승 속도가 깎여 걸리는 문제 방지
+        Collider2D col = GetComponent<Collider2D>();
+        if (col.sharedMaterial == null || col.sharedMaterial.friction != 0f)
+        {
+            col.sharedMaterial = new PhysicsMaterial2D("SlimeNoFriction") { friction = 0f, bounciness = 0f };
+        }
     }
 
     private void Update()

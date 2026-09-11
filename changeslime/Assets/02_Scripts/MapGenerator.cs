@@ -31,6 +31,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Camera targetCamera; // 비워두면 Camera.main 사용
     [SerializeField] private float cameraPadding = 1f; // 맵 가장자리 여유 공간(유닛)
 
+    [Header("바닥 충돌 이음새 병합")]
+    [SerializeField] private bool mergeGroundColliders = true; // 바닥 타일 사이 이음새에 걸려 점프가 멈추는 문제 방지
+
     private void Start()
     {
         GenerateMap();
@@ -77,13 +80,55 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        if (mergeGroundColliders)
+            SetupCompositeGroundCollider();
+
         FitCameraToMap(mapRows);
     }
 
     private void SpawnTile(GameObject prefab, Vector2 position)
     {
         if (prefab == null) return;
-        Instantiate(prefab, position, Quaternion.identity, transform);
+
+        GameObject instance = Instantiate(prefab, position, Quaternion.identity, transform);
+
+        // 바닥 타일끼리는 콜라이더를 하나로 합쳐서, 타일 이음새에 캐릭터가 걸리지 않도록 함
+        if (mergeGroundColliders && prefab == groundPrefab)
+        {
+            BoxCollider2D box = instance.GetComponent<BoxCollider2D>();
+            if (box != null)
+                box.compositeOperation = Collider2D.CompositeOperation.Merge;
+        }
+    }
+
+    /// <summary>
+    /// 이 오브젝트에 Rigidbody2D(Static) + CompositeCollider2D를 준비해서,
+    /// compositeOperation이 Merge로 설정된 자식 바닥 타일들의 콜라이더를 이음새 없는 하나의 도형으로 합침
+    /// </summary>
+    private void SetupCompositeGroundCollider()
+    {
+        Rigidbody2D groundBody = GetComponent<Rigidbody2D>();
+        if (groundBody == null)
+            groundBody = gameObject.AddComponent<Rigidbody2D>();
+        groundBody.bodyType = RigidbodyType2D.Static;
+
+        CompositeCollider2D composite = GetComponent<CompositeCollider2D>();
+        if (composite == null)
+            composite = gameObject.AddComponent<CompositeCollider2D>();
+        composite.geometryType = CompositeCollider2D.GeometryType.Polygons;
+
+        // 병합된 콜라이더는 물리적으로 이 오브젝트(MapGenerator) 소속이 되므로,
+        // 바닥 판정(groundLayer)이 제대로 되도록 이 오브젝트도 바닥 타일과 같은 레이어로 맞춰줌
+        if (groundPrefab != null)
+            gameObject.layer = groundPrefab.layer;
+
+        // 벽에 붙어 점프할 때 마찰로 걸리는 문제 방지 (플레이어 쪽 무마찰 재질과 짝을 맞춤)
+        if (composite.sharedMaterial == null || composite.sharedMaterial.friction != 0f)
+        {
+            composite.sharedMaterial = new PhysicsMaterial2D("GroundNoFriction") { friction = 0f, bounciness = 0f };
+        }
+
+        composite.GenerateGeometry();
     }
 
     /// <summary>
