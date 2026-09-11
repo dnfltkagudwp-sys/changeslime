@@ -24,6 +24,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject solidPrefab;  // 'S'
     [SerializeField] private GameObject gasPrefab;    // 'G'
     [SerializeField] private GameObject goalPrefab;   // 'X'
+    [SerializeField] private GameObject liquidGatePrefab;    // 'W' 액체 상태일 때만 통과 가능
+    [SerializeField] private GameObject gasGatePrefab;       // 'V' 기체 상태일 때만 통과 가능
+    [SerializeField] private GameObject breakableBlockPrefab; // 'B' 고체 상태로 낙하 충돌해야 부서짐
 
     [Header("플레이어 (선택, 'P' 위치로 이동시킴)")]
     [SerializeField] private Transform player;
@@ -75,6 +78,15 @@ public class MapGenerator : MonoBehaviour
                         break;
                     case 'X':
                         SpawnTile(goalPrefab, pos);
+                        break;
+                    case 'W':
+                        SpawnTile(liquidGatePrefab, pos);
+                        break;
+                    case 'V':
+                        SpawnTile(gasGatePrefab, pos);
+                        break;
+                    case 'B':
+                        SpawnTile(breakableBlockPrefab, pos);
                         break;
                     case 'P':
                         if (player != null)
