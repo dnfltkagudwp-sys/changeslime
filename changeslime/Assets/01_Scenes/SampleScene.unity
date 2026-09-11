@@ -537,7 +537,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SlimeMovement
   moveSpeed: 5
-  jumpForce: 6
+  jumpForce: 9
   groundCheckPoint: {fileID: 1209010503}
   checkRadius: 0.2
   groundLayer:
@@ -594,7 +594,7 @@ Transform:
   m_GameObject: {fileID: 1105783563}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.08, y: -3, z: 0}
+  m_LocalPosition: {x: -0.26, y: -2.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -612,13 +612,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8c3198151c062409c29ba33b84484e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapRows:
-  - '####################'
-  - '#P                 #'
-  - '#      ###     G   #'
-  - '#  S               #'
-  - '#     ###   L      #'
-  - '####################'
+  mapText: '########################
+
+    #                      #
+
+    #                      #
+
+    #                      #
+
+    #                      #
+
+    #                      #
+
+    #                      #
+
+    #                      #
+
+    #P   L  ##   S     G   #
+
+    ########################'
   cellSize: 1
   origin: {x: 0, y: 0}
   groundPrefab: {fileID: 9130585056232702319, guid: fc9b3b8550f4eed4fa3352d3c0eb4d48, type: 3}
@@ -626,6 +638,8 @@ MonoBehaviour:
   solidPrefab: {fileID: 861280235006919517, guid: 133e7f851c438204b8783e6b7dd58f8d, type: 3}
   gasPrefab: {fileID: 7151893025317273675, guid: bd7210815af64b94fb5b92ad9cedd33b, type: 3}
   player: {fileID: 1064669596}
+  targetCamera: {fileID: 519420031}
+  cameraPadding: 1
 --- !u!1 &1209010502
 GameObject:
   m_ObjectHideFlags: 0
