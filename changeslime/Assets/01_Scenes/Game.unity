@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &264352467
+--- !u!1001 &478482081
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -176,6 +176,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 53f36278ceb927b4f8ef84b27d07adb5, type: 3}
+--- !u!4 &478482082 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3127136131130815410, guid: 53f36278ceb927b4f8ef84b27d07adb5, type: 3}
+  m_PrefabInstance: {fileID: 478482081}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,7 +331,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82d98d9f8b66ab742be2242a22bea051, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 1931713947}
+  target: {fileID: 478482082}
   deadZoneSize: {x: 3, y: 2}
   smoothTime: 0.2
   useBounds: 0
@@ -488,29 +493,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8c3198151c062409c29ba33b84484e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapText: '#######################################
+  mapText: '#########
 
-    #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+    #       #
 
-    #                                     #
+    #      *#
 
-    #P   # # # #                 S        #
+    #       #
 
-    #### # # # # ###################  #####
+    #######V#
 
-    #  # # # # # #                 #  #   #
+    #       #
 
-    #  # G S G ^ #                 #  #   #
+    ####### #
 
-    #  ###########                 # BBB  #
+    #PW* S  #
 
-    #                      *       # B*B  #
+    ####### #
 
-    #                      #       # BBB  #
+    #       #
 
-    #                              #  L   #
+    #######B#
 
-    #######################################'
+    #     G*#
+
+    #########'
   cellSize: 1
   origin: {x: 0, y: 0}
   groundPrefab: {fileID: 9130585056232702319, guid: fc9b3b8550f4eed4fa3352d3c0eb4d48, type: 3}
@@ -522,7 +529,11 @@ MonoBehaviour:
   gasGatePrefab: {fileID: 1200000000000001, guid: 95d9944111e3f1f478c1ae09c1f3428b, type: 3}
   breakableBlockPrefab: {fileID: 1300000000000001, guid: 60f2d7b4af9e4d54684d18b58998e7de, type: 3}
   starPrefab: {fileID: 5889132648355342533, guid: 8273640bd6fed72469a021b6da5b7c20, type: 3}
-  player: {fileID: 1931713947}
+  spikePrefab: {fileID: 7761447987447335624, guid: d11e27c84cbc46b684174b1f33256937, type: 3}
+  laserCurtainPrefab: {fileID: 2932120483445442488, guid: 57c70f47e7844c6dae9f42aac684b129, type: 3}
+  electricPipePrefab: {fileID: 2221168646932892824, guid: 4a905ce72a2d4ac7881676724b8470a5, type: 3}
+  suctionFanPrefab: {fileID: 1642504828380182732, guid: 03ee000323654eec83a9c700457c70d0, type: 3}
+  player: {fileID: 478482082}
   autoFitCameraToMap: 0
   targetCamera: {fileID: 0}
   cameraPadding: 1
@@ -619,11 +630,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &1931713947 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3127136131130815410, guid: 53f36278ceb927b4f8ef84b27d07adb5, type: 3}
-  m_PrefabInstance: {fileID: 264352467}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &54367414104840367
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -638,7 +644,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StarManager
   clearMessage: GAME CLEAR!
   nextLevelButtonLabel: "\uB2E4\uC74C \uB808\uBCA8"
-  nextSceneName: 
+  levelManager: {fileID: 4787201085345140678}
+  nextSceneName:
 --- !u!4 &2712930536378317045
 Transform:
   m_ObjectHideFlags: 0
@@ -671,6 +678,219 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1428847857206861569
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8915660781741352975}
+  - component: {fileID: 4787201085345140678}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8915660781741352975
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428847857206861569}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4787201085345140678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428847857206861569}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 179faf951ea942b5951c4374e953e7c1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::LevelManager
+  mapGenerator: {fileID: 1105783565}
+  allLevelsText: '#########
+
+    #       #
+
+    #      *#
+
+    #       #
+
+    #######V#
+
+    #       #
+
+    ####### #
+
+    #PW* S  #
+
+    ####### #
+
+    #       #
+
+    #######B#
+
+    #     G*#
+
+    #########
+
+    ===LEVEL===
+
+    ##########################
+
+    # *    L        S        #
+
+    #                        #
+
+    ##### ####     ###    ####
+
+    #            #           #
+
+    #            #           #
+
+    #            #   BBB     #
+
+    #            #   B*B     #
+
+    # P        G #   BBB     #
+
+    ##### ####################
+
+    ##########################
+
+    ===LEVEL===
+
+    #########################################
+
+    #........S......L.................S.....#
+
+    #.......................................#
+
+    #########..######...##########..........#
+
+    #...............#............#..........#
+
+    #...............#......*.....#...BBB....#
+
+    #...............#.....##.....#...B*B....#
+
+    #..P.....^..G...#.........G..#...BBB....#
+
+    #########################################
+
+    ===LEVEL===
+
+    ########################################
+
+    #      S               L              *#
+
+    #                                     V#
+
+    #####   ########     #       ########  #
+
+    #              #     #                 #
+
+    #              #     #               S #
+
+    #     # #      #     #         ####### #
+
+    #     #*#      #     #       ###      B#
+
+    #     #B#         G  #     ###        G#
+
+    # P    L             #   ###          ##
+
+    ########################################
+
+    ===LEVEL===
+
+    ################################
+
+    #          L               S   #
+
+    #                              #
+
+    #  ###                 #       #
+
+    #    #                 #       #
+
+    #    #                 #       #
+
+    #    #                 #  BBB  #
+
+    # G  #     *       G   #  B*B  #
+
+    # P  #     #           #  BBB  #
+
+    ################################
+
+    ===LEVEL===
+
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    ....................................
+
+    ............................S...#...
+
+    ..P...#.#.#.#.#################.#...
+
+    ..###.#.#.#.#.................#.#...
+
+    ......#.#.#.#.................BBB...
+
+    .....^#G#S#G#.................B*B...
+
+    .....########.................BBB...
+
+    ...............................L....
+
+    ....................*.........###...
+
+    ....................#...............
+
+    ....................################
+
+    ===LEVEL===
+
+    #######################################
+
+    #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+
+    #                                     #
+
+    #P   # # # #                 S        #
+
+    #### # # # # ###################  #####
+
+    #  # # # # # #                 #  #   #
+
+    #  # G S G ^ #                 #  #   #
+
+    #  ###########                 # BBB  #
+
+    #                      *       # B*B  #
+
+    #                      #       # BBB  #
+
+    #                              #  L   #
+
+    #######################################'
+  startLevelIndex: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -680,4 +900,5 @@ SceneRoots:
   - {fileID: 1105783564}
   - {fileID: 1323726783}
   - {fileID: 2712930536378317045}
-  - {fileID: 264352467}
+  - {fileID: 478482081}
+  - {fileID: 8915660781741352975}

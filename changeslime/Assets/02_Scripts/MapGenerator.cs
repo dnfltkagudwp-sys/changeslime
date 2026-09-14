@@ -14,6 +14,13 @@ public class MapGenerator : MonoBehaviour
         "#           L      #\n" +
         "####################";
 
+    /// <summary>LevelManager 등 외부에서 다음 레벨의 맵 텍스트로 교체할 때 사용.</summary>
+    public string MapText
+    {
+        get => mapText;
+        set => mapText = value;
+    }
+
     [Header("칸 크기 및 원점")]
     [SerializeField] private float cellSize = 1f;
     [SerializeField] private Vector2 origin = Vector2.zero;

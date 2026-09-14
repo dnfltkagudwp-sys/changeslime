@@ -28,7 +28,7 @@ public static class SceneBuildSettingsSync
         if (!Directory.Exists(ScenesFolder)) return;
 
         EditorBuildSettingsScene[] scenes = Directory
-            .GetFiles(ScenesFolder, "*.unity", SearchOption.AllDirectories)
+            .GetFiles(ScenesFolder, "*.unity", SearchOption.TopDirectoryOnly) // 하위 폴더(예: _Archive)는 빌드 목록에서 제외
             .Select(path => path.Replace('\\', '/'))
             .OrderBy(path => path)
             .Select(path => new EditorBuildSettingsScene(path, true))

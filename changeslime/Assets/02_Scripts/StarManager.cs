@@ -17,7 +17,10 @@ public class StarManager : MonoBehaviour
     [Header("다음 레벨 버튼")]
     [SerializeField] private string nextLevelButtonLabel = "다음 레벨";
 
-    [Header("다음 씬 이름 (비워두면 버튼을 눌러도 전환하지 않음)")]
+    [Header("다음 레벨 (LevelManager가 있으면 씬 전환 없이 이걸 우선 사용)")]
+    [SerializeField] private LevelManager levelManager; // 비워두면 씬에서 자동으로 찾음
+
+    [Header("다음 씬 이름 (LevelManager가 없을 때만 사용, 비워두면 전환 안 함)")]
     [SerializeField] private string nextSceneName;
 
     private int totalStars;
@@ -28,6 +31,9 @@ public class StarManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+
+        if (levelManager == null)
+            levelManager = FindFirstObjectByType<LevelManager>();
     }
 
     /// <summary>
@@ -53,7 +59,15 @@ public class StarManager : MonoBehaviour
 
     private void OnNextLevelClicked()
     {
-        if (!string.IsNullOrEmpty(nextSceneName))
+        // 클리어 UI는 다음 레벨로 넘어갈 때 가려야 함 (씬 전환 없이 그대로 재사용되므로)
+        if (clearUIRoot != null)
+            clearUIRoot.SetActive(false);
+
+        if (levelManager != null)
+        {
+            levelManager.LoadNextLevel();
+        }
+        else if (!string.IsNullOrEmpty(nextSceneName))
         {
             SceneManager.LoadScene(nextSceneName);
         }
