@@ -27,6 +27,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject liquidGatePrefab;    // 'W' 액체 상태일 때만 통과 가능
     [SerializeField] private GameObject gasGatePrefab;       // 'V' 기체 상태일 때만 통과 가능
     [SerializeField] private GameObject breakableBlockPrefab; // 'B' 고체 상태로 낙하 충돌해야 부서짐
+    [SerializeField] private GameObject starPrefab;   // '*' 클리어하려면 맵의 별을 모두 모아야 함
 
     [Header("플레이어 (선택, 'P' 위치로 이동시킴)")]
     [SerializeField] private Transform player;
@@ -38,6 +39,12 @@ public class MapGenerator : MonoBehaviour
 
     [Header("바닥 충돌 이음새 병합")]
     [SerializeField] private bool mergeGroundColliders = true; // 바닥 타일 사이 이음새에 걸려 점프가 멈추는 문제 방지
+
+    /// <summary>생성된 맵 전체의 중앙 좌표 (월드 기준). CameraFollow의 전체 맵 보기 기능 등에서 참조.</summary>
+    public Vector2 MapCenter { get; private set; }
+
+    /// <summary>생성된 맵 전체의 가로/세로 크기 (월드 유닛 기준).</summary>
+    public Vector2 MapWorldSize { get; private set; }
 
     private void Start()
     {
@@ -53,6 +60,7 @@ public class MapGenerator : MonoBehaviour
         }
 
         string[] mapRows = mapText.Replace("\r\n", "\n").Split('\n');
+        int starCount = 0;
 
         for (int row = 0; row < mapRows.Length; row++)
         {
@@ -88,6 +96,10 @@ public class MapGenerator : MonoBehaviour
                     case 'B':
                         SpawnTile(breakableBlockPrefab, pos);
                         break;
+                    case '*':
+                        SpawnTile(starPrefab, pos);
+                        starCount++;
+                        break;
                     case 'P':
                         if (player != null)
                             player.position = pos;
@@ -100,8 +112,13 @@ public class MapGenerator : MonoBehaviour
         if (mergeGroundColliders)
             SetupCompositeGroundCollider();
 
+        UpdateMapBoundsInfo(mapRows);
+
         if (autoFitCameraToMap)
             FitCameraToMap(mapRows);
+
+        if (StarManager.Instance != null)
+            StarManager.Instance.SetTotalStars(starCount);
     }
 
     private void SpawnTile(GameObject prefab, Vector2 position)
@@ -147,6 +164,25 @@ public class MapGenerator : MonoBehaviour
         }
 
         composite.GenerateGeometry();
+    }
+
+    /// <summary>
+    /// MapCenter / MapWorldSize를 갱신함 (CameraFollow의 전체 맵 보기 등 외부에서 맵 크기를 알아야 할 때 사용).
+    /// </summary>
+    private void UpdateMapBoundsInfo(string[] mapRows)
+    {
+        int rowCount = mapRows.Length;
+        int colCount = 0;
+        foreach (string line in mapRows)
+            colCount = Mathf.Max(colCount, line.Length);
+
+        if (rowCount == 0 || colCount == 0) return;
+
+        float mapWidth = colCount * cellSize;
+        float mapHeight = rowCount * cellSize;
+
+        MapWorldSize = new Vector2(mapWidth, mapHeight);
+        MapCenter = origin + new Vector2(mapWidth / 2f - cellSize / 2f, -(mapHeight / 2f - cellSize / 2f));
     }
 
     /// <summary>

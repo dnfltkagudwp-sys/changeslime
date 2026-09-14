@@ -20,11 +20,47 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private Vector2 minBounds;
     [SerializeField] private Vector2 maxBounds;
 
+    [Header("전체 맵 보기 (키를 누르고 있는 동안 맵 전체가 보이도록 줌아웃)")]
+    [SerializeField] private MapGenerator mapGenerator; // 비워두면 씬에서 자동으로 찾음
+    [SerializeField] private KeyCode fullMapViewKey = KeyCode.Tab;
+    [SerializeField] private float fullMapPadding = 1f;
+    [SerializeField] private float zoomSmoothTime = 0.25f;
+
     private Vector3 currentVelocity = Vector3.zero; // SmoothDamp 내부 계산용
+    private float zoomVelocity = 0f;
+    private Camera cam;
+    private float defaultOrthoSize;
+
+    private void Awake()
+    {
+        cam = GetComponent<Camera>();
+        if (cam == null) cam = Camera.main;
+        if (cam != null) defaultOrthoSize = cam.orthographicSize;
+
+        if (mapGenerator == null)
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
+    }
 
     private void LateUpdate()
     {
         if (target == null) return;
+
+        bool fullMapView = mapGenerator != null && cam != null && Input.GetKey(fullMapViewKey);
+
+        if (fullMapView)
+        {
+            Vector3 mapCenterPos = new Vector3(mapGenerator.MapCenter.x, mapGenerator.MapCenter.y, transform.position.z);
+            transform.position = Vector3.SmoothDamp(transform.position, mapCenterPos, ref currentVelocity, zoomSmoothTime);
+
+            float verticalSize = mapGenerator.MapWorldSize.y / 2f + fullMapPadding;
+            float horizontalSize = (mapGenerator.MapWorldSize.x / cam.aspect) / 2f + fullMapPadding;
+            float targetSize = Mathf.Max(verticalSize, horizontalSize);
+            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, targetSize, ref zoomVelocity, zoomSmoothTime);
+            return;
+        }
+
+        if (cam != null)
+            cam.orthographicSize = Mathf.SmoothDamp(cam.orthographicSize, defaultOrthoSize, ref zoomVelocity, zoomSmoothTime);
 
         Vector3 camPos = transform.position;
         Vector3 targetPos = target.position;
