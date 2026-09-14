@@ -488,29 +488,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8c3198151c062409c29ba33b84484e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapText: '^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  mapText: '#######################################
 
-    ....................................
+    #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 
-    ............................S...#...
+    #                                     #
 
-    ..P...#.#.#.#.#################.#...
+    #P   # # # #                 S        #
 
-    ..###.#.#.#.#.................#.#...
+    #### # # # # ###################  #####
 
-    ......#.#.#.#.................BBB...
+    #  # # # # # #                 #  #   #
 
-    .....^#G#S#G#.................B*B...
+    #  # G S G ^ #                 #  #   #
 
-    .....########.................BBB...
+    #  ###########                 # BBB  #
 
-    ...............................L....
+    #                      *       # B*B  #
 
-    ....................*.........###...
+    #                      #       # BBB  #
 
-    ....................#...............
+    #                              #  L   #
 
-    ....................################'
+    #######################################'
   cellSize: 1
   origin: {x: 0, y: 0}
   groundPrefab: {fileID: 9130585056232702319, guid: fc9b3b8550f4eed4fa3352d3c0eb4d48, type: 3}
@@ -522,7 +522,6 @@ MonoBehaviour:
   gasGatePrefab: {fileID: 1200000000000001, guid: 95d9944111e3f1f478c1ae09c1f3428b, type: 3}
   breakableBlockPrefab: {fileID: 1300000000000001, guid: 60f2d7b4af9e4d54684d18b58998e7de, type: 3}
   starPrefab: {fileID: 5889132648355342533, guid: 8273640bd6fed72469a021b6da5b7c20, type: 3}
-  spikePrefab: {fileID: 0}
   player: {fileID: 1931713947}
   autoFitCameraToMap: 0
   targetCamera: {fileID: 0}
@@ -639,7 +638,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StarManager
   clearMessage: GAME CLEAR!
   nextLevelButtonLabel: "\uB2E4\uC74C \uB808\uBCA8"
-  nextSceneName: Level_06
+  nextSceneName: 
 --- !u!4 &2712930536378317045
 Transform:
   m_ObjectHideFlags: 0

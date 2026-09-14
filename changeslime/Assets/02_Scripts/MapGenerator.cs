@@ -28,6 +28,10 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject gasGatePrefab;       // 'V' 기체 상태일 때만 통과 가능
     [SerializeField] private GameObject breakableBlockPrefab; // 'B' 고체 상태로 낙하 충돌해야 부서짐
     [SerializeField] private GameObject starPrefab;   // '*' 클리어하려면 맵의 별을 모두 모아야 함
+    [SerializeField] private GameObject spikePrefab;  // '^' 닿으면 즉시 리스폰되는 함정
+    [SerializeField] private GameObject laserCurtainPrefab; // 'Z' 상태 무관, 닿으면 즉시 리스폰
+    [SerializeField] private GameObject electricPipePrefab; // 'E' 액체 상태일 때만 닿으면 리스폰
+    [SerializeField] private GameObject suctionFanPrefab;   // 'F' 기체 상태일 때만 닿으면 리스폰
 
     [Header("플레이어 (선택, 'P' 위치로 이동시킴)")]
     [SerializeField] private Transform player;
@@ -99,6 +103,18 @@ public class MapGenerator : MonoBehaviour
                     case '*':
                         SpawnTile(starPrefab, pos);
                         starCount++;
+                        break;
+                    case '^':
+                        SpawnTile(spikePrefab, pos);
+                        break;
+                    case 'Z':
+                        SpawnTile(laserCurtainPrefab, pos);
+                        break;
+                    case 'E':
+                        SpawnTile(electricPipePrefab, pos);
+                        break;
+                    case 'F':
+                        SpawnTile(suctionFanPrefab, pos);
                         break;
                     case 'P':
                         if (player != null)

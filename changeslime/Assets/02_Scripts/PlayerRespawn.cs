@@ -10,12 +10,14 @@ public class PlayerRespawn : MonoBehaviour
 
     private Rigidbody2D rb;
     private SlimeStateController stateController;
+    private MapGenerator mapGenerator;
     private Vector3 spawnPosition;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         stateController = GetComponent<SlimeStateController>();
+        mapGenerator = FindFirstObjectByType<MapGenerator>();
         spawnPosition = transform.position;
     }
 
@@ -38,6 +40,10 @@ public class PlayerRespawn : MonoBehaviour
     /// </summary>
     public void Respawn()
     {
+        // 부서진 블록/모은 별 등 맵 상태 전체를 처음 그대로 다시 생성함
+        if (mapGenerator != null)
+            mapGenerator.GenerateMap();
+
         transform.position = spawnPosition;
         rb.position = spawnPosition;
         rb.linearVelocity = Vector2.zero;
