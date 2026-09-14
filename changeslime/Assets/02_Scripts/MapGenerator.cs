@@ -102,7 +102,24 @@ public class MapGenerator : MonoBehaviour
                         break;
                     case 'P':
                         if (player != null)
+                        {
                             player.position = pos;
+
+                            // Rigidbody2D는 transform.position만 바꾸면 물리 엔진에 바로 반영되지 않고
+                            // 남아있던 이전 위치를 들고 있다가 최초 속도 변화(입력) 시점에야 동기화되는 경우가 있어,
+                            // rb.position도 직접 맞추고 깨워서 즉시 반영되도록 함
+                            Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
+                            if (playerRb != null)
+                            {
+                                playerRb.position = pos;
+                                playerRb.linearVelocity = Vector2.zero;
+                                playerRb.WakeUp();
+                            }
+
+                            PlayerRespawn respawn = player.GetComponent<PlayerRespawn>();
+                            if (respawn != null)
+                                respawn.SetSpawnPoint(pos);
+                        }
                         break;
                     // 그 외 문자(공백 등)는 빈 칸으로 취급하고 넘어감
                 }
