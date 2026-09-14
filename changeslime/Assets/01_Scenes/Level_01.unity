@@ -275,6 +275,10 @@ MonoBehaviour:
   useBounds: 0
   minBounds: {x: 0, y: 0}
   maxBounds: {x: 0, y: 0}
+  mapGenerator: {fileID: 0}
+  fullMapViewKey: 9
+  fullMapPadding: 1
+  zoomSmoothTime: 0.25
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,27 +583,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e8c3198151c062409c29ba33b84484e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapGenerator
-  mapText: '#                        #
+  mapText: '#################
 
-    #                    X   #
+    #              *#
 
-    #                        #
+    ###############V#
 
-    #                        #
+    #               #
 
-    #                        #
+    #               #
 
-    #                    V   #
+    #               #
 
-    #                        #
+    ############### #
 
-    #        S               #
+    #PS LW* G V* S  #
 
-    #P       #    LW     G   #
+    ############### #
 
-    #####  ###B######  #######
+    #               #
 
-    ##########################'
+    ###############B#
+
+    #             G*#
+
+    #################'
   cellSize: 1
   origin: {x: 0, y: 0}
   groundPrefab: {fileID: 9130585056232702319, guid: fc9b3b8550f4eed4fa3352d3c0eb4d48, type: 3}
@@ -610,6 +618,7 @@ MonoBehaviour:
   liquidGatePrefab: {fileID: 1100000000000001, guid: 2ec52e674a0f22146af92af6f20e22aa, type: 3}
   gasGatePrefab: {fileID: 1200000000000001, guid: 95d9944111e3f1f478c1ae09c1f3428b, type: 3}
   breakableBlockPrefab: {fileID: 1300000000000001, guid: 60f2d7b4af9e4d54684d18b58998e7de, type: 3}
+  starPrefab: {fileID: 5889132648355342533, guid: 8273640bd6fed72469a021b6da5b7c20, type: 3}
   player: {fileID: 1064669596}
   autoFitCameraToMap: 0
   targetCamera: {fileID: 0}
@@ -710,7 +719,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -20
   m_MaskInteraction: 0
   m_Sprite: {fileID: -8143386531897177758, guid: a1d16e629724662489004dadb2f4854c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -733,7 +742,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.25035, y: -2.38108, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -830,6 +839,53 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &54367414104840367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4560743548128817443}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3036b448d318acf4fbe1978617822976, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarManager
+  clearMessage: GAME CLEAR!
+  nextLevelButtonLabel: "\uB2E4\uC74C \uB808\uBCA8"
+  nextSceneName: Level_02
+--- !u!4 &2712930536378317045
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4560743548128817443}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4560743548128817443
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2712930536378317045}
+  - component: {fileID: 54367414104840367}
+  m_Layer: 0
+  m_Name: StarManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -839,3 +895,4 @@ SceneRoots:
   - {fileID: 1064669596}
   - {fileID: 1105783564}
   - {fileID: 1323726783}
+  - {fileID: 2712930536378317045}
