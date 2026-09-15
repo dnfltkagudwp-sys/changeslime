@@ -533,6 +533,7 @@ MonoBehaviour:
   laserCurtainPrefab: {fileID: 2932120483445442488, guid: 57c70f47e7844c6dae9f42aac684b129, type: 3}
   electricPipePrefab: {fileID: 2221168646932892824, guid: 4a905ce72a2d4ac7881676724b8470a5, type: 3}
   suctionFanPrefab: {fileID: 1642504828380182732, guid: 03ee000323654eec83a9c700457c70d0, type: 3}
+  toxicMistPrefab: {fileID: 2654235107732649054, guid: f7c2eb9bd17d42639769f3c1ddcfc780, type: 3}
   player: {fileID: 478482082}
   autoFitCameraToMap: 0
   targetCamera: {fileID: 0}
@@ -749,7 +750,7 @@ MonoBehaviour:
 
     #########
 
-    ===LEVEL===
+    ===LEVEL 1===
 
     ##########################
 
@@ -773,7 +774,7 @@ MonoBehaviour:
 
     ##########################
 
-    ===LEVEL===
+    ===LEVEL 2===
 
     #########################################
 
@@ -793,7 +794,7 @@ MonoBehaviour:
 
     #########################################
 
-    ===LEVEL===
+    ===LEVEL 3===
 
     ########################################
 
@@ -817,7 +818,7 @@ MonoBehaviour:
 
     ########################################
 
-    ===LEVEL===
+    ===LEVEL 4===
 
     ################################
 
@@ -839,7 +840,7 @@ MonoBehaviour:
 
     ################################
 
-    ===LEVEL===
+    ===LEVEL 5===
 
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -865,11 +866,13 @@ MonoBehaviour:
 
     ....................################
 
-    ===LEVEL===
+    ===LEVEL 6===
 
     #######################################
 
-    #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+    #MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM#
+
+    #                                     #
 
     #                                     #
 
@@ -879,7 +882,7 @@ MonoBehaviour:
 
     #  # # # # # #                 #  #   #
 
-    #  # G S G ^ #                 #  #   #
+    #  # G S G M #                 #  #   #
 
     #  ###########                 # BBB  #
 

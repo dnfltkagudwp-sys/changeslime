@@ -1,5 +1,7 @@
 using System;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 여러 레벨을 씬 전환 없이 하나의 MapGenerator로 순서대로 불러오는 매니저.
@@ -8,11 +10,13 @@ using UnityEngine;
 /// </summary>
 public class LevelManager : MonoBehaviour
 {
-    private const string LevelSeparator = "===LEVEL===";
+    // "===LEVEL===" 뒤에 숫자를 붙여도(예: "===LEVEL 3===") 구분자로 인식됨 —
+    // 텍스트가 길어지면 어디가 몇 레벨인지 알아보기 힘드므로, 구분자에 다음 레벨 번호를 적어두는 걸 권장
+    private static readonly Regex LevelSeparatorPattern = new Regex(@"===LEVEL\s*\d*===");
 
     [SerializeField] private MapGenerator mapGenerator; // 비워두면 씬에서 자동으로 찾음
 
-    [Header("레벨 텍스트를 ===LEVEL=== 한 줄로 구분해서 순서대로 이어붙이기")]
+    [Header("레벨 텍스트를 ===LEVEL N=== 한 줄로 구분해서 순서대로 이어붙이기 (N은 안 적어도 됨, 알아보기용)")]
     [TextArea(10, 100)]
     [SerializeField] private string allLevelsText;
 
@@ -22,15 +26,17 @@ public class LevelManager : MonoBehaviour
     private string[] levelTexts;
     private int currentLevelIndex;
     private SlimeStateController playerState;
+    private Text levelLabel;
 
     private void Awake()
     {
-        levelTexts = allLevelsText.Split(new[] { LevelSeparator }, StringSplitOptions.None);
+        levelTexts = LevelSeparatorPattern.Split(allLevelsText);
 
         if (mapGenerator == null)
             mapGenerator = FindFirstObjectByType<MapGenerator>();
 
         playerState = FindFirstObjectByType<SlimeStateController>();
+        levelLabel = CreateLevelLabelUI();
     }
 
     private void Start()
@@ -50,6 +56,42 @@ public class LevelManager : MonoBehaviour
         // 레벨이 바뀔 때 이전 레벨의 마지막 상태가 그대로 넘어오지 않도록 여기서 초기화함
         if (playerState != null)
             playerState.ChangeState(SlimeState.Liquid);
+
+        // ===LEVEL N=== 구분자 번호, Start Level Index 필드와 숫자를 그대로 맞추기 위해 0부터 표기
+        if (levelLabel != null)
+            levelLabel.text = $"Level {currentLevelIndex} (index) / max {levelTexts.Length - 1}";
+    }
+
+    /// <summary>
+    /// 테스트 중에 지금 몇 번째 레벨인지 한눈에 보이도록 화면 좌상단에 작은 라벨을 띄움.
+    /// </summary>
+    private Text CreateLevelLabelUI()
+    {
+        GameObject canvasObj = new GameObject("LevelLabelCanvas");
+        Canvas canvas = canvasObj.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 1000;
+        canvasObj.AddComponent<CanvasScaler>();
+        canvasObj.AddComponent<GraphicRaycaster>();
+
+        GameObject textObj = new GameObject("LevelLabel");
+        textObj.transform.SetParent(canvasObj.transform, false);
+
+        Text text = textObj.AddComponent<Text>();
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.fontSize = 28;
+        text.fontStyle = FontStyle.Bold;
+        text.alignment = TextAnchor.UpperLeft;
+        text.color = Color.white;
+
+        RectTransform rect = text.rectTransform;
+        rect.anchorMin = new Vector2(0f, 1f);
+        rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(16f, -12f);
+        rect.sizeDelta = new Vector2(300f, 50f);
+
+        return text;
     }
 
     public void LoadNextLevel()

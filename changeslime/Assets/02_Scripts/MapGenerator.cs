@@ -39,6 +39,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject laserCurtainPrefab; // 'Z' 상태 무관, 닿으면 즉시 리스폰
     [SerializeField] private GameObject electricPipePrefab; // 'E' 액체 상태일 때만 닿으면 리스폰
     [SerializeField] private GameObject suctionFanPrefab;   // 'F' 기체 상태일 때만 닿으면 리스폰
+    [SerializeField] private GameObject toxicMistPrefab;    // 'M' 상태 무관, 닿으면 즉시 리스폰 (천장에 붙여도 자연스러운 가로형 가스 장애물)
 
     [Header("플레이어 (선택, 'P' 위치로 이동시킴)")]
     [SerializeField] private Transform player;
@@ -122,6 +123,9 @@ public class MapGenerator : MonoBehaviour
                         break;
                     case 'F':
                         SpawnTile(suctionFanPrefab, pos);
+                        break;
+                    case 'M':
+                        SpawnTile(toxicMistPrefab, pos);
                         break;
                     case 'P':
                         if (player != null)
