@@ -640,20 +640,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6829435510886597985
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1323726781}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 463f383d2ec04ec2ba3b754f9d4c9469, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::BackgroundFitter
-  targetCamera: {fileID: 519420031}
-  padding: 2
 --- !u!114 &54367414104840367
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -744,7 +730,7 @@ MonoBehaviour:
 
     ............MM......
 
-    
+
 
     ===LEVEL1===
 
@@ -760,7 +746,7 @@ MonoBehaviour:
 
     ......................MM....
 
-    
+
 
     ===LEVEL2===
 
@@ -784,7 +770,7 @@ MonoBehaviour:
 
     ...............#################
 
-    
+
 
     ===LEVEL3===
 
@@ -810,7 +796,7 @@ MonoBehaviour:
 
     ##################################
 
-    
+
 
     ===LEVEL4===
 
@@ -840,7 +826,7 @@ MonoBehaviour:
 
     .............................################
 
-    
+
 
     ===LEVEL5===
 
@@ -865,7 +851,22 @@ MonoBehaviour:
     #.........................*..G..#
 
     #################################'
-  startLevelIndex: 0
+  startLevelIndex: 5
+--- !u!114 &6829435510886597985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1323726781}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 463f383d2ec04ec2ba3b754f9d4c9469, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BackgroundFitter
+  targetCamera: {fileID: 519420031}
+  padding: 2
+  parallaxFactor: 0.9
 --- !u!4 &8915660781741352975
 Transform:
   m_ObjectHideFlags: 0
