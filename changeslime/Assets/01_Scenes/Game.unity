@@ -532,7 +532,6 @@ MonoBehaviour:
   liquidPrefab: {fileID: 8054196416335486419, guid: 04ce8f689d8f656449e2d2fda30b8acd, type: 3}
   solidPrefab: {fileID: 861280235006919517, guid: 133e7f851c438204b8783e6b7dd58f8d, type: 3}
   gasPrefab: {fileID: 7151893025317273675, guid: bd7210815af64b94fb5b92ad9cedd33b, type: 3}
-  goalPrefab: {fileID: 6689609098129255052, guid: bafa0dacdc444b143acfd71d558c91a7, type: 3}
   liquidGatePrefab: {fileID: 1100000000000001, guid: 2ec52e674a0f22146af92af6f20e22aa, type: 3}
   gasGatePrefab: {fileID: 1200000000000001, guid: 95d9944111e3f1f478c1ae09c1f3428b, type: 3}
   breakableBlockPrefab: {fileID: 1300000000000001, guid: 60f2d7b4af9e4d54684d18b58998e7de, type: 3}
