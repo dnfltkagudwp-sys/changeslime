@@ -30,7 +30,6 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject liquidPrefab; // 'L'
     [SerializeField] private GameObject solidPrefab;  // 'S'
     [SerializeField] private GameObject gasPrefab;    // 'G'
-    [SerializeField] private GameObject goalPrefab;   // 'X'
     [SerializeField] private GameObject liquidGatePrefab;    // 'W' 액체 상태일 때만 통과 가능
     [SerializeField] private GameObject gasGatePrefab;       // 'V' 기체 상태일 때만 통과 가능
     [SerializeField] private GameObject breakableBlockPrefab; // 'B' 고체 상태로 낙하 충돌해야 부서짐
@@ -57,11 +56,6 @@ public class MapGenerator : MonoBehaviour
 
     /// <summary>생성된 맵 전체의 가로/세로 크기 (월드 유닛 기준).</summary>
     public Vector2 MapWorldSize { get; private set; }
-
-    private void Start()
-    {
-        GenerateMap();
-    }
 
     public void GenerateMap()
     {
@@ -95,9 +89,6 @@ public class MapGenerator : MonoBehaviour
                         break;
                     case 'G':
                         SpawnTile(gasPrefab, pos);
-                        break;
-                    case 'X':
-                        SpawnTile(goalPrefab, pos);
                         break;
                     case 'W':
                         SpawnTile(liquidGatePrefab, pos);
