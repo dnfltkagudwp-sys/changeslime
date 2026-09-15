@@ -8,8 +8,8 @@ public class PlayerRespawn : MonoBehaviour
 {
     [SerializeField] private KeyCode respawnKey = KeyCode.R;
 
-    [Header("추락사 (맵 바닥보다 이만큼 더 아래로 떨어지면 리스폰)")]
-    [SerializeField] private float fallDeathMargin = 3f;
+    [Header("맵 이탈사 (맵 위/아래 경계보다 이만큼 더 벗어나면 리스폰 — 추락은 물론, 기체로 계속 떠올라 천장 밖으로 나가는 경우도 포함)")]
+    [SerializeField] private float outOfBoundsMargin = 3f;
 
     private Rigidbody2D rb;
     private SlimeStateController stateController;
@@ -29,11 +29,15 @@ public class PlayerRespawn : MonoBehaviour
         if (Input.GetKeyDown(respawnKey))
             Respawn();
 
-        // 맵 바닥보다 한참 아래로 떨어지면(구덩이를 잘못 건너뛰는 등) 자동으로 리스폰시킴
+        // 맵 위/아래 경계를 한참 벗어나면 자동으로 리스폰시킴
+        // (구덩이를 잘못 건너뛰어 추락하는 경우 + 기체 상태로 계속 떠올라 천장 뚫린 곳으로 빠져나가는 경우 둘 다 커버)
         if (mapGenerator != null)
         {
-            float killY = mapGenerator.MapCenter.y - mapGenerator.MapWorldSize.y / 2f - fallDeathMargin;
-            if (transform.position.y < killY)
+            float halfHeight = mapGenerator.MapWorldSize.y / 2f;
+            float bottomY = mapGenerator.MapCenter.y - halfHeight - outOfBoundsMargin;
+            float topY = mapGenerator.MapCenter.y + halfHeight + outOfBoundsMargin;
+
+            if (transform.position.y < bottomY || transform.position.y > topY)
                 Respawn();
         }
     }
