@@ -38,7 +38,7 @@ public class CameraFollow : MonoBehaviour
         if (cam != null) defaultOrthoSize = cam.orthographicSize;
 
         if (mapGenerator == null)
-            mapGenerator = FindFirstObjectByType<MapGenerator>();
+            mapGenerator = FindAnyObjectByType<MapGenerator>();
     }
 
     private void LateUpdate()

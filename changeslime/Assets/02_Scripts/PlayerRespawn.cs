@@ -8,6 +8,9 @@ public class PlayerRespawn : MonoBehaviour
 {
     [SerializeField] private KeyCode respawnKey = KeyCode.R;
 
+    [Header("추락사 (맵 바닥보다 이만큼 더 아래로 떨어지면 리스폰)")]
+    [SerializeField] private float fallDeathMargin = 3f;
+
     private Rigidbody2D rb;
     private SlimeStateController stateController;
     private MapGenerator mapGenerator;
@@ -17,7 +20,7 @@ public class PlayerRespawn : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         stateController = GetComponent<SlimeStateController>();
-        mapGenerator = FindFirstObjectByType<MapGenerator>();
+        mapGenerator = FindAnyObjectByType<MapGenerator>();
         spawnPosition = transform.position;
     }
 
@@ -25,6 +28,14 @@ public class PlayerRespawn : MonoBehaviour
     {
         if (Input.GetKeyDown(respawnKey))
             Respawn();
+
+        // 맵 바닥보다 한참 아래로 떨어지면(구덩이를 잘못 건너뛰는 등) 자동으로 리스폰시킴
+        if (mapGenerator != null)
+        {
+            float killY = mapGenerator.MapCenter.y - mapGenerator.MapWorldSize.y / 2f - fallDeathMargin;
+            if (transform.position.y < killY)
+                Respawn();
+        }
     }
 
     /// <summary>

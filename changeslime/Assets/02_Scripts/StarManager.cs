@@ -33,7 +33,7 @@ public class StarManager : MonoBehaviour
         Instance = this;
 
         if (levelManager == null)
-            levelManager = FindFirstObjectByType<LevelManager>();
+            levelManager = FindAnyObjectByType<LevelManager>();
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class StarManager : MonoBehaviour
     /// </summary>
     private void EnsureEventSystemExists()
     {
-        if (FindFirstObjectByType<EventSystem>() != null) return;
+        if (FindAnyObjectByType<EventSystem>() != null) return;
 
         GameObject eventSystemObj = new GameObject("EventSystem");
         eventSystemObj.AddComponent<EventSystem>();

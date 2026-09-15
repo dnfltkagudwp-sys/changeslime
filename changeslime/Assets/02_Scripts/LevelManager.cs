@@ -33,9 +33,9 @@ public class LevelManager : MonoBehaviour
         levelTexts = LevelSeparatorPattern.Split(allLevelsText);
 
         if (mapGenerator == null)
-            mapGenerator = FindFirstObjectByType<MapGenerator>();
+            mapGenerator = FindAnyObjectByType<MapGenerator>();
 
-        playerState = FindFirstObjectByType<SlimeStateController>();
+        playerState = FindAnyObjectByType<SlimeStateController>();
         levelLabel = CreateLevelLabelUI();
     }
 
