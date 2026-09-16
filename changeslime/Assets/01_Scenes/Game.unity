@@ -719,7 +719,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   mapGenerator: {fileID: 1105783565}
-  allLevelsText: '#########
+  allLevelsText: '#########...........
 
     #....W..............
 
@@ -727,15 +727,13 @@ MonoBehaviour:
 
     #P...W...........*..
 
-    ############..######
-
-    ............MM......
+    ############MM######
 
 
 
     ===LEVEL1===
 
-    ###############
+    ###############.............
 
     #...........E...............
 
@@ -743,9 +741,7 @@ MonoBehaviour:
 
     #P......S...E....L.......*..
 
-    ######################..####
-
-    ......................MM....
+    ######################MM####
 
 
 
@@ -946,6 +942,7 @@ MonoBehaviour:
   jumpAheadCheckDistance: 2
   padDetectRadius: 2.2
   guideFadeSpeed: 6
+  infoGuideDuration: 3
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

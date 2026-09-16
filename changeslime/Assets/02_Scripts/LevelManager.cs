@@ -66,9 +66,14 @@ public class LevelManager : MonoBehaviour
         if (playerState != null)
             playerState.ChangeState(SlimeState.Liquid);
 
-        // 플레이어에게는 내부 인덱스가 아니라 1부터 시작하는 레벨 번호로 표시함
+        // 플레이어에게는 내부 인덱스를 노출하지 않음: 0번 인덱스는 "튜토리얼", 그 외에는 1부터 시작하는
+        // 레벨 번호 / 전체 레벨 수(튜토리얼 제외, 하드코딩 없이 levelTexts에서 계산)로 표시
         if (levelLabel != null)
-            levelLabel.text = $"레벨 {currentLevelIndex + 1} / {levelTexts.Length}";
+        {
+            levelLabel.text = currentLevelIndex == 0
+                ? "튜토리얼"
+                : $"레벨 {currentLevelIndex} / {levelTexts.Length - 1}";
+        }
     }
 
     /// <summary>

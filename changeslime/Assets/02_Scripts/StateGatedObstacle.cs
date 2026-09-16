@@ -10,6 +10,9 @@ public class StateGatedObstacle : MonoBehaviour
     [Header("이 상태일 때만 통과 가능 (그 외 상태에서는 벽)")]
     [SerializeField] private SlimeState passableState;
 
+    /// <summary>이 게이트를 통과할 수 있는 상태. HUD 가이드가 "이 게이트를 지나쳤는지" 판단하는 용도로 읽기 전용 참조.</summary>
+    public SlimeState PassableState => passableState;
+
     [Header("플레이어 참조 (비워두면 자동으로 찾음)")]
     [SerializeField] private SlimeStateController player;
 

@@ -209,18 +209,6 @@ public class SlimeMovement : MonoBehaviour
         visualTransform.localPosition = Vector3.Lerp(visualTransform.localPosition, targetLocalPosition, Time.deltaTime * stretchSpeed);
     }
 
-    /// <summary>
-    /// 진행 방향(오른쪽)으로 aheadDistance만큼 떨어진 지점에 바닥이 없는지 확인.
-    /// 조작 가이드가 "다음이 점프해야 하는 구간인지"를 판단하는 용도로만 사용하며, 실제 이동/점프 로직에는 관여하지 않음.
-    /// </summary>
-    public bool IsGroundAheadMissing(float aheadDistance)
-    {
-        if (groundCheckPoint == null) return false;
-
-        Vector2 checkPos = (Vector2)groundCheckPoint.position + Vector2.right * aheadDistance;
-        return !Physics2D.OverlapCircle(checkPos, checkRadius, groundLayer);
-    }
-
     private void OnDrawGizmosSelected()
     {
         // 에디터에서 바닥 감지 영역 확인용

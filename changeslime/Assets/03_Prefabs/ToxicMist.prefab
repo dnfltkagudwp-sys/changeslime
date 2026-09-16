@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2556678537664537713}
   - component: {fileID: 5566711552518406348}
   - component: {fileID: 1542177767456000108}
+  - component: {fileID: 798209787722931375}
   m_Layer: 0
   m_Name: ToxicMist
   m_TagString: Untagged
@@ -143,3 +144,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b2b91bed7fa405bbd75eb7955bda21f, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SpikeTrap
+--- !u!114 &798209787722931375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2654235107732649054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3638f040df204ccaa1c5937af5b31858, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ToxicMistMarker

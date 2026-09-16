@@ -3,40 +3,48 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 전 레벨 공통 HUD(현재 상태 / 별 개수 / 재시작 / 전체 맵 보기 안내)와, 특정 레벨에서만 한 번씩 표시되는
-/// 이동·점프 조작 안내 및 액체·고체·기체 상태별 특성 설명을 담당함. 기존 상태 전환·별 수집·레벨 전환
-/// 로직은 읽기만 하고 전혀 바꾸지 않음 — 화면에 그리는 것만 담당하는 순수 UI 레이어.
+/// 조작 안내(이동/변환 패드/파괴 블록), 상태별 특성 설명(액체/고체/기체), 독성 안개 사전 경고를 담당함.
+/// 독성 안개 경고는 위험 요소로서 다른 모든 일반 안내보다 우선하며 즉시 끼어듦.
+/// 기존 상태 전환·별 수집·레벨 전환 로직은 읽기만 하고 전혀 바꾸지 않음 — 화면에 그리는 것만 담당하는 순수 UI 레이어.
 /// </summary>
 public class GameHUD : MonoBehaviour
 {
-    [Header("이동/점프 안내 + 액체 특성 설명을 보여줄 레벨 인덱스 (게임 내 표시 기준 1레벨)")]
-    [SerializeField] private int moveJumpGuideLevelIndex = 0;
+    [Header("이동 안내 + 독성 안개 경고를 보여줄 레벨 인덱스 (튜토리얼)")]
+    [SerializeField] private int tutorialGuideLevelIndex = 0;
 
-    [Header("변환 패드 안내 + 고체 특성 설명을 보여줄 레벨 인덱스 (게임 내 표시 기준 2레벨, 첫 변환 블록 등장)")]
+    [Header("변환 패드 안내 + 고체 특성 설명을 보여줄 레벨 인덱스 (레벨 1, 첫 변환 블록 등장)")]
     [SerializeField] private int padGuideLevelIndex = 1;
 
     [Header("조작 가이드 감지 설정")]
-    [SerializeField] private float moveGuideDistance = 1.5f;    // 이 거리 이상 좌우로 움직이면 이동 안내를 숨김
-    [SerializeField] private float jumpAheadCheckDistance = 1f; // 오른쪽으로 이 거리만큼 바닥이 있는지 확인
-    [SerializeField] private float padDetectRadius = 2.2f;      // 이 반경 안에 변환 패드가 있으면 패드 안내 표시
-    [SerializeField] private float guideFadeSpeed = 6f;         // 안내 문구 페이드 인/아웃 속도
+    [SerializeField] private float moveGuideDistance = 1.5f;      // 이 거리 이상 좌우로 움직이면 이동 안내를 숨김
+    [SerializeField] private float gatePassedMargin = 0.5f;       // 첫 액체 통로를 이만큼 지나쳐야 "통과함"으로 인정
+    [SerializeField] private float hazardWarningDistance = 3.5f;  // 독성 안개보다 이만큼 앞에서 미리 경고 표시
+    [SerializeField] private float padDetectRadius = 2.2f;        // 이 반경 안에 변환 패드가 있으면 패드 안내 표시
+    [SerializeField] private float breakableDetectRadius = 3f;    // 이 반경 안에 파괴 블록이 있으면 안내 표시
+    [SerializeField] private float guideFadeSpeed = 6f;           // 안내 문구 페이드 인/아웃 속도
 
-    [Header("상태별 특성 설명 (처음 소개되는 레벨에서 한 번만, 일정 시간 표시 후 자동으로 사라짐)")]
-    [SerializeField] private float infoGuideDuration = 4f;
+    [Header("상태별 특성 설명 (레벨당 한 번만, 일정 시간 표시 후 자동으로 사라짐)")]
+    [SerializeField] private float infoGuideDuration = 3f;
 
-    private enum GuideKind { None, Move, Jump, Pad, LiquidInfo, SolidInfo, GasInfo }
+    // 행동 안내(조건이 유지되는 동안 표시, 행동을 마치면 바로 사라짐): Move / ToxicJumpWarning / Pad / BreakableInfo
+    // 상태 설명(한 번 뜨면 정해진 시간만큼 유지되는 토스트): LiquidInfo / SolidInfo / GasInfo
+    private enum GuideKind { None, Move, ToxicJumpWarning, Pad, BreakableInfo, LiquidInfo, SolidInfo, GasInfo }
 
     private static readonly Color LiquidColor = new Color(0.35f, 0.65f, 1f);   // 파란색 계열
     private static readonly Color SolidColor = new Color(0.75f, 0.78f, 0.8f);  // 회색 계열
     private static readonly Color GasColor = new Color(0.75f, 0.95f, 1f);      // 밝은 하늘색 계열
 
-    private const string LiquidInfoMessage = "액체: 점프할 수 있고 액체 통로를 통과합니다.\n전류 배관에 닿으면 재시작됩니다.";
-    private const string SolidInfoMessage = "고체: 느리고 점프할 수 없지만 전류에 안전합니다.\n높은 곳에서 떨어지면 파괴 블록을 부술 수 있습니다.";
-    private const string GasInfoMessage = "기체: 계속 위로 떠오르며 스스로 내려올 수 없습니다.\n기체 통로를 통과하지만 독성 안개에 닿으면 재시작됩니다.";
+    private const string MoveMessage = "A/D 또는 방향키로 이동";
+    private const string ToxicJumpWarningMessage = "독성 안개에 닿으면 재시작됩니다.\nSpace로 뛰어넘으세요.";
+    private const string PadMessage = "패드에 닿으면 상태가 변합니다.";
+    private const string BreakableInfoMessage = "고체 상태로 높은 곳에서 떨어지면\n파괴 블록을 부술 수 있습니다.";
+    private const string LiquidInfoMessage = "액체: 점프할 수 있고 액체 통로를 통과합니다.";
+    private const string SolidInfoMessage = "고체: 느리고 점프할 수 없지만 전류에 안전합니다.";
+    private const string GasInfoMessage = "기체: 계속 위로 떠오르며 스스로 내려올 수 없습니다.\n기체 통로를 통과할 수 있습니다.";
 
     private LevelManager levelManager;
     private CameraFollow cameraFollow;
     private SlimeStateController playerState;
-    private SlimeMovement playerMovement;
     private PlayerRespawn playerRespawn;
     private Transform playerTransform;
 
@@ -50,7 +58,6 @@ public class GameHUD : MonoBehaviour
     private int lastGenerationId = int.MinValue;
     private float levelStartX;
     private bool movedEnough;
-    private bool jumpConditionSeen;
     private SlimeState lastObservedState;
     private bool suppressPadGuide;
     private bool liquidInfoShown;
@@ -58,7 +65,8 @@ public class GameHUD : MonoBehaviour
     private bool solidInfoShown;
     private bool gasInfoPending;
     private bool gasInfoShown;
-    private int gasGuideLevelIndex = int.MinValue; // 아직 계산 안 함(캐시 전) 표시값
+    private int gasGuideLevelIndex = int.MinValue;       // 아직 계산 안 함(캐시 전) 표시값
+    private int breakableGuideLevelIndex = int.MinValue; // 아직 계산 안 함(캐시 전) 표시값
     private GuideKind displayedGuide = GuideKind.None;
     private float infoGuideTimer;
 
@@ -75,7 +83,6 @@ public class GameHUD : MonoBehaviour
         playerState = FindAnyObjectByType<SlimeStateController>();
         if (playerState == null) return;
 
-        playerMovement = playerState.GetComponent<SlimeMovement>();
         playerRespawn = playerState.GetComponent<PlayerRespawn>();
         playerTransform = playerState.transform;
         lastObservedState = playerState.CurrentState;
@@ -130,6 +137,8 @@ public class GameHUD : MonoBehaviour
     {
         if (gasGuideLevelIndex == int.MinValue)
             gasGuideLevelIndex = levelManager != null ? levelManager.FirstLevelIndexContaining('G') : -1;
+        if (breakableGuideLevelIndex == int.MinValue)
+            breakableGuideLevelIndex = levelManager != null ? levelManager.FirstLevelIndexContaining('B') : -1;
 
         int currentLevelIndex = levelManager != null ? levelManager.CurrentLevelIndex : int.MinValue;
         int generationId = StarManager.Instance != null ? StarManager.Instance.GenerationId : int.MinValue;
@@ -140,7 +149,6 @@ public class GameHUD : MonoBehaviour
         {
             lastGenerationId = generationId;
             movedEnough = false;
-            jumpConditionSeen = false;
             suppressPadGuide = false;
             liquidInfoShown = false;
             solidInfoPending = false;
@@ -166,35 +174,28 @@ public class GameHUD : MonoBehaviour
             lastObservedState = newState;
         }
 
-        bool moveJumpEnabled = currentLevelIndex == moveJumpGuideLevelIndex && playerTransform != null && playerMovement != null;
+        bool tutorialEnabled = currentLevelIndex == tutorialGuideLevelIndex && playerTransform != null;
         bool padGuideEnabled = currentLevelIndex == padGuideLevelIndex && playerTransform != null;
         bool gasGuideEnabled = gasGuideLevelIndex >= 0 && currentLevelIndex == gasGuideLevelIndex;
+        bool breakableGuideEnabled = breakableGuideLevelIndex >= 0 && currentLevelIndex == breakableGuideLevelIndex && playerTransform != null;
 
         GuideKind desired = GuideKind.None;
         string desiredText = null;
         Color desiredColor = Color.white;
 
-        if (moveJumpEnabled)
+        // --- 일반 안내(행동 안내 + 상태 설명), 대기열처럼 조건이 되는 순서대로 하나씩 ---
+        if (tutorialEnabled)
         {
             if (!movedEnough && Mathf.Abs(playerTransform.position.x - levelStartX) > moveGuideDistance)
                 movedEnough = true;
 
-            bool needsJump = playerMovement.IsGrounded && playerMovement.IsGroundAheadMissing(jumpAheadCheckDistance);
-            if (needsJump) jumpConditionSeen = true;
-
             if (!movedEnough)
             {
                 desired = GuideKind.Move;
-                desiredText = "A/D 또는 방향키로 이동";
+                desiredText = MoveMessage;
             }
-            else if (needsJump)
+            else if (!liquidInfoShown && HasPassedGate(SlimeState.Liquid))
             {
-                desired = GuideKind.Jump;
-                desiredText = "Space로 점프";
-            }
-            else if (!liquidInfoShown && jumpConditionSeen)
-            {
-                // 이동·점프 안내를 이미 한 번씩 겪은 뒤, 지금 당장 점프가 필요한 상황이 아닐 때 이어서 설명
                 desired = GuideKind.LiquidInfo;
                 desiredText = LiquidInfoMessage;
                 desiredColor = LiquidColor;
@@ -210,7 +211,7 @@ public class GameHUD : MonoBehaviour
             if (nearPad && !suppressPadGuide)
             {
                 desired = GuideKind.Pad;
-                desiredText = "패드에 닿으면 상태가 변합니다";
+                desiredText = PadMessage;
             }
             else if (solidInfoPending && !solidInfoShown)
             {
@@ -227,8 +228,14 @@ public class GameHUD : MonoBehaviour
             desiredColor = GasColor;
         }
 
-        // 상태별 설명은 한 번 표시되기 시작하면(페이드 인 도중 포함), 정해진 시간이 다 지나기 전까지는
-        // 위 판단과 무관하게 계속 붙잡아둠. 다 보인 뒤부터만 시간을 차감해서 "완전히 보이는 시간"이 약 infoGuideDuration초가 되게 함
+        if (desired == GuideKind.None && breakableGuideEnabled && IsNearBreakableBlock())
+        {
+            desired = GuideKind.BreakableInfo;
+            desiredText = BreakableInfoMessage;
+        }
+
+        // 상태 설명(Liquid/Solid/Gas)은 한 번 표시되기 시작하면(페이드 인 도중 포함), 정해진 시간이
+        // 다 지나기 전까지는 위 판단과 무관하게 계속 붙잡아둠 — 단, 아래 위험 안내가 끼어들면 예외
         bool displayingInfoGuide = displayedGuide == GuideKind.LiquidInfo || displayedGuide == GuideKind.SolidInfo || displayedGuide == GuideKind.GasInfo;
         if (displayingInfoGuide && infoGuideTimer > 0f)
         {
@@ -237,13 +244,36 @@ public class GameHUD : MonoBehaviour
                 infoGuideTimer -= Time.deltaTime;
         }
 
+        // --- 위험 요소 안내: 일반 대기열보다 항상 우선하며, 표시 중이던 일반 안내를 즉시 끊고 나타남 ---
+        bool hazardActive = tutorialEnabled && IsToxicMistAhead();
+        bool interruptingOtherGuide = hazardActive && displayedGuide != GuideKind.ToxicJumpWarning;
+
+        if (hazardActive)
+        {
+            desired = GuideKind.ToxicJumpWarning;
+            desiredText = ToxicJumpWarningMessage;
+            desiredColor = Color.white;
+        }
+
         bool shouldShow = desired != GuideKind.None;
 
-        // 다른 안내로 바뀔 때는 완전히 사라진 다음에만 문구를 바꿔치기해서 겹쳐 보이지 않게 함
+        // 다른 안내로 바뀔 때는 완전히 사라진 다음에만 문구를 바꿔치기해서 겹쳐 보이지 않게 함.
+        // 단, 위험 안내가 새로 끼어드는 경우는 예외로 즉시 바꿔치기함
         if (desired != displayedGuide)
         {
-            if (guideGroup.alpha <= 0.02f)
+            if (guideGroup.alpha <= 0.02f || interruptingOtherGuide)
             {
+                // 위험 안내에 밀려 중간에 끊긴 일반 안내는 이후에도 다시 반복하지 않도록 처리
+                if (interruptingOtherGuide)
+                {
+                    switch (displayedGuide)
+                    {
+                        case GuideKind.LiquidInfo: liquidInfoShown = true; break;
+                        case GuideKind.SolidInfo: solidInfoShown = true; solidInfoPending = false; break;
+                        case GuideKind.GasInfo: gasInfoShown = true; gasInfoPending = false; break;
+                    }
+                }
+
                 displayedGuide = desired;
                 guideText.text = desiredText ?? string.Empty;
                 guideText.color = desiredColor;
@@ -288,6 +318,60 @@ public class GameHUD : MonoBehaviour
         {
             if (trigger == null) continue;
             if ((trigger.transform.position - playerTransform.position).sqrMagnitude <= sqrRadius)
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>지정한 상태로만 통과 가능한 게이트 중 가장 먼저(왼쪽) 있는 것을 플레이어가 지나쳤는지 확인.</summary>
+    private bool HasPassedGate(SlimeState passableState)
+    {
+        if (playerTransform == null) return false;
+
+        StateGatedObstacle[] gates = FindObjectsByType<StateGatedObstacle>(FindObjectsSortMode.None);
+        float? nearestGateX = null;
+
+        foreach (StateGatedObstacle gate in gates)
+        {
+            if (gate == null || gate.PassableState != passableState) continue;
+            float gateX = gate.transform.position.x;
+            if (nearestGateX == null || gateX < nearestGateX.Value)
+                nearestGateX = gateX;
+        }
+
+        return nearestGateX != null && playerTransform.position.x > nearestGateX.Value + gatePassedMargin;
+    }
+
+    /// <summary>독성 안개가 진행 방향(오른쪽) 앞쪽, 미리 반응할 수 있는 거리 안에 있는지 확인.</summary>
+    private bool IsToxicMistAhead()
+    {
+        if (playerTransform == null) return false;
+
+        ToxicMistMarker[] mists = FindObjectsByType<ToxicMistMarker>(FindObjectsSortMode.None);
+        foreach (ToxicMistMarker mist in mists)
+        {
+            if (mist == null) continue;
+            float dx = mist.transform.position.x - playerTransform.position.x;
+            if (dx > -0.5f && dx <= hazardWarningDistance)
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool IsNearBreakableBlock()
+    {
+        if (playerTransform == null) return false;
+
+        BreakableBlock[] blocks = FindObjectsByType<BreakableBlock>(FindObjectsSortMode.None);
+        if (blocks.Length == 0) return false;
+
+        float sqrRadius = breakableDetectRadius * breakableDetectRadius;
+        foreach (BreakableBlock block in blocks)
+        {
+            if (block == null) continue;
+            if ((block.transform.position - playerTransform.position).sqrMagnitude <= sqrRadius)
                 return true;
         }
 
