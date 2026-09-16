@@ -38,9 +38,9 @@ public class GameHUD : MonoBehaviour
     private const string ToxicJumpWarningMessage = "독성 안개에 닿으면 재시작됩니다.\nSpace로 뛰어넘으세요.";
     private const string PadMessage = "패드에 닿으면 상태가 변합니다.";
     private const string BreakableInfoMessage = "고체 상태로 높은 곳에서 떨어지면\n파괴 블록을 부술 수 있습니다.";
-    private const string LiquidInfoMessage = "액체: 점프할 수 있고 액체 통로를 통과합니다.";
+    private const string LiquidInfoMessage = "액체: 점프할 수 있고 가시를 통과합니다.";
     private const string SolidInfoMessage = "고체: 느리고 점프할 수 없지만 전류에 안전합니다.";
-    private const string GasInfoMessage = "기체: 계속 위로 떠오르며 스스로 내려올 수 없습니다.\n기체 통로를 통과할 수 있습니다.";
+    private const string GasInfoMessage = "기체: 계속 위로 떠오르며 스스로 내려올 수 없습니다.\n환풍구를 통과할 수 있습니다.";
 
     private LevelManager levelManager;
     private CameraFollow cameraFollow;
