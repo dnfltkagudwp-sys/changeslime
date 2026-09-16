@@ -719,16 +719,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
   mapGenerator: {fileID: 1105783565}
-  allLevelsText: '#########...........
+  allLevelsText: '#########.................
 
-    #....W..............
+    #....W....................
 
-    #....W..............
+    #....W....................
 
-    #P...W...........*..
+    #P...W................*...
 
-    ############MM######
-
+    ##################MM######
 
 
     ===LEVEL1===
@@ -936,11 +935,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1de37cd56b0f419c88c578ddfd56b716, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameHUD
-  moveJumpGuideLevelIndex: 0
+  tutorialGuideLevelIndex: 0
   padGuideLevelIndex: 1
   moveGuideDistance: 1.5
-  jumpAheadCheckDistance: 2
+  gatePassedMargin: 0.5
+  hazardWarningDistance: 3.5
   padDetectRadius: 2.2
+  breakableDetectRadius: 3
   guideFadeSpeed: 6
   infoGuideDuration: 3
 --- !u!1660057539 &9223372036854775807
