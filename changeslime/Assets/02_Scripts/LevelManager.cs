@@ -28,6 +28,9 @@ public class LevelManager : MonoBehaviour
     private SlimeStateController playerState;
     private Text levelLabel;
 
+    /// <summary>현재 로드된 레벨의 인덱스 (0=시작 전 프롤로그, 1="===LEVEL1===" 이후의 1레벨). HUD 등 외부에서 읽기 전용으로 참조.</summary>
+    public int CurrentLevelIndex => currentLevelIndex;
+
     private void Awake()
     {
         levelTexts = LevelSeparatorPattern.Split(allLevelsText);

@@ -23,6 +23,9 @@ public class SlimeMovement : MonoBehaviour
     [SerializeField] private float crawlStretchAmount = 0.12f; // 꾸물거릴 때 늘어나고 움츠러드는 정도
     [SerializeField] private float crawlLeanAmount = 0.05f;    // 꾸물거리는 리듬에 맞춰 이동 방향으로 살짝 쏠리는 정도
 
+    /// <summary>현재 바닥에 붙어있는지 여부 (HUD 조작 가이드 등 외부에서 읽기 전용으로 참조).</summary>
+    public bool IsGrounded => isGrounded;
+
     private Rigidbody2D rb;
     private float horizontalInput;
     private bool isGrounded;
@@ -201,6 +204,18 @@ public class SlimeMovement : MonoBehaviour
         float verticalAnchorOffset = (visualTransform.localScale.y - originalScale.y) * 0.5f;
         Vector3 targetLocalPosition = originalLocalPosition + new Vector3(leanX * squashIntensity, verticalAnchorOffset, 0f);
         visualTransform.localPosition = Vector3.Lerp(visualTransform.localPosition, targetLocalPosition, Time.deltaTime * stretchSpeed);
+    }
+
+    /// <summary>
+    /// 진행 방향(오른쪽)으로 aheadDistance만큼 떨어진 지점에 바닥이 없는지 확인.
+    /// 조작 가이드가 "다음이 점프해야 하는 구간인지"를 판단하는 용도로만 사용하며, 실제 이동/점프 로직에는 관여하지 않음.
+    /// </summary>
+    public bool IsGroundAheadMissing(float aheadDistance)
+    {
+        if (groundCheckPoint == null) return false;
+
+        Vector2 checkPos = (Vector2)groundCheckPoint.position + Vector2.right * aheadDistance;
+        return !Physics2D.OverlapCircle(checkPos, checkRadius, groundLayer);
     }
 
     private void OnDrawGizmosSelected()

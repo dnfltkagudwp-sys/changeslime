@@ -28,6 +28,12 @@ public class StarManager : MonoBehaviour
     private bool cleared = false;
     private GameObject clearUIRoot;
 
+    /// <summary>현재 레벨의 전체 별 개수. HUD 등 외부에서 읽기 전용으로 참조.</summary>
+    public int TotalStars => totalStars;
+
+    /// <summary>현재 레벨에서 모은 별 개수. HUD 등 외부에서 읽기 전용으로 참조.</summary>
+    public int CollectedStars => collectedStars;
+
     private void Awake()
     {
         Instance = this;
@@ -88,6 +94,7 @@ public class StarManager : MonoBehaviour
         GameObject canvasObj = new GameObject("ClearMessageCanvas");
         Canvas canvas = canvasObj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 50; // 상시 표시되는 HUD보다 위에 그려지도록 함
         canvasObj.AddComponent<CanvasScaler>();
         canvasObj.AddComponent<GraphicRaycaster>();
 

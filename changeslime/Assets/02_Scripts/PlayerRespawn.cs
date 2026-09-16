@@ -8,6 +8,9 @@ public class PlayerRespawn : MonoBehaviour
 {
     [SerializeField] private KeyCode respawnKey = KeyCode.R;
 
+    /// <summary>리스폰 단축키. HUD 안내 문구가 실제 설정값과 어긋나지 않도록 외부에서 읽기 전용으로 참조.</summary>
+    public KeyCode RespawnKey => respawnKey;
+
     [Header("맵 이탈사 (맵 위/아래 경계보다 이만큼 더 벗어나면 리스폰 — 추락은 물론, 기체로 계속 떠올라 천장 밖으로 나가는 경우도 포함)")]
     [SerializeField] private float outOfBoundsMargin = 3f;
 
