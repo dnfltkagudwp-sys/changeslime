@@ -219,7 +219,9 @@ public class GameHUD : MonoBehaviour
 
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        // 유니티 내장 폰트(LegacyRuntime.ttf)는 한글 글리프가 없어 WebGL에서 한글이 안 보이므로,
+        // 한글을 지원하는 폰트를 우선 사용하고 못 찾으면 내장 폰트로 대체함
+        Font font = Resources.Load<Font>("Fonts/NanumGothic-Regular") ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
         // 좌측 상단: 현재 상태 (LevelManager의 디버그용 레벨 라벨이 이미 좌측 상단 맨 위를 쓰고 있어 그 아래에 배치)
         stateText = CreateHudText(canvasObj.transform, font, "StateText",

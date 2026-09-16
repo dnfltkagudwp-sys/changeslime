@@ -112,7 +112,9 @@ public class StarManager : MonoBehaviour
         canvasObj.AddComponent<CanvasScaler>();
         canvasObj.AddComponent<GraphicRaycaster>();
 
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        // 유니티 내장 폰트(LegacyRuntime.ttf)는 한글 글리프가 없어 WebGL에서 한글이 안 보이므로,
+        // 한글을 지원하는 폰트를 우선 사용하고 못 찾으면 내장 폰트로 대체함
+        Font font = Resources.Load<Font>("Fonts/NanumGothic-Regular") ?? Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
         GameObject textObj = new GameObject("ClearText");
         textObj.transform.SetParent(canvasObj.transform, false);
