@@ -860,7 +860,7 @@ MonoBehaviour:
     #...................................L..W..G...*..#
 
     ##################################################'
-  startLevelIndex: 3
+  startLevelIndex: 0
 --- !u!1 &6007335207576691049
 GameObject:
   m_ObjectHideFlags: 0
