@@ -11,11 +11,17 @@ public class StarManager : MonoBehaviour
 {
     public static StarManager Instance { get; private set; }
 
-    [Header("클리어 문구")]
+    [Header("클리어 문구 (중간 레벨)")]
     [SerializeField] private string clearMessage = "GAME CLEAR!";
 
-    [Header("다음 레벨 버튼")]
+    [Header("다음 레벨 버튼 (중간 레벨)")]
     [SerializeField] private string nextLevelButtonLabel = "다음 레벨";
+
+    [Header("클리어 문구 (마지막 레벨 — LevelManager 기준 레벨이 나중에 추가돼도 자동으로 마지막 레벨에 적용됨)")]
+    [SerializeField] private string finalClearMessage = "ALL CLEAR!";
+
+    [Header("재시작 버튼 (마지막 레벨)")]
+    [SerializeField] private string restartButtonLabel = "처음부터 다시";
 
     [Header("다음 레벨 (LevelManager가 있으면 씬 전환 없이 이걸 우선 사용)")]
     [SerializeField] private LevelManager levelManager; // 비워두면 씬에서 자동으로 찾음
@@ -27,6 +33,8 @@ public class StarManager : MonoBehaviour
     private int collectedStars;
     private bool cleared = false;
     private GameObject clearUIRoot;
+    private Text clearMessageText;
+    private Text clearButtonText;
 
     /// <summary>현재 레벨의 전체 별 개수. HUD 등 외부에서 읽기 전용으로 참조.</summary>
     public int TotalStars => totalStars;
@@ -84,6 +92,12 @@ public class StarManager : MonoBehaviour
         if (clearUIRoot == null)
             clearUIRoot = CreateClearUI();
 
+        // 지금이 마지막 레벨인지에 따라 문구/버튼을 다르게 보여줌.
+        // 레벨이 나중에 추가/삭제돼도 LevelManager.IsLastLevel이 그때그때 다시 계산되므로 손볼 필요 없음.
+        bool isLastLevel = levelManager != null && levelManager.IsLastLevel;
+        clearMessageText.text = isLastLevel ? finalClearMessage : clearMessage;
+        clearButtonText.text = isLastLevel ? restartButtonLabel : nextLevelButtonLabel;
+
         clearUIRoot.SetActive(true);
     }
 
@@ -110,6 +124,7 @@ public class StarManager : MonoBehaviour
         text.fontStyle = FontStyle.Bold;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.white;
+        clearMessageText = text;
 
         RectTransform textRect = text.rectTransform;
         textRect.anchorMin = new Vector2(0f, 0.55f);
@@ -143,6 +158,7 @@ public class StarManager : MonoBehaviour
         buttonText.fontStyle = FontStyle.Bold;
         buttonText.alignment = TextAnchor.MiddleCenter;
         buttonText.color = Color.black;
+        clearButtonText = buttonText;
 
         RectTransform buttonTextRect = buttonText.rectTransform;
         buttonTextRect.anchorMin = Vector2.zero;

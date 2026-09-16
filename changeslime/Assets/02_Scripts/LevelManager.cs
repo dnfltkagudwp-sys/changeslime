@@ -31,6 +31,12 @@ public class LevelManager : MonoBehaviour
     /// <summary>현재 로드된 레벨의 인덱스 (0=시작 전 프롤로그, 1="===LEVEL1===" 이후의 1레벨). HUD 등 외부에서 읽기 전용으로 참조.</summary>
     public int CurrentLevelIndex => currentLevelIndex;
 
+    /// <summary>
+    /// 지금이 마지막 레벨인지 여부. allLevelsText에 레벨이 나중에 추가/삭제되어도
+    /// levelTexts.Length 기준으로 자동으로 맞으므로, 최종 레벨 번호를 따로 하드코딩할 필요 없음.
+    /// </summary>
+    public bool IsLastLevel => levelTexts != null && levelTexts.Length > 0 && currentLevelIndex >= levelTexts.Length - 1;
+
     private void Awake()
     {
         levelTexts = LevelSeparatorPattern.Split(allLevelsText);
