@@ -860,7 +860,7 @@ MonoBehaviour:
     #...................................L..W..G...*..#
 
     ##################################################'
-  startLevelIndex: 0
+  startLevelIndex: 3
 --- !u!1 &6007335207576691049
 GameObject:
   m_ObjectHideFlags: 0
@@ -941,7 +941,8 @@ MonoBehaviour:
   gatePassedMargin: 0.5
   hazardWarningDistance: 3.5
   padDetectRadius: 2.2
-  breakableDetectRadius: 3
+  breakableDetectRadius: 5
+  breakableMinDisplayTime: 2
   guideFadeSpeed: 6
   infoGuideDuration: 3
 --- !u!1660057539 &9223372036854775807

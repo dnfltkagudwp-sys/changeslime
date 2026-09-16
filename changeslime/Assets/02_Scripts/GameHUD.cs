@@ -20,7 +20,8 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private float gatePassedMargin = 0.5f;       // 첫 액체 통로를 이만큼 지나쳐야 "통과함"으로 인정
     [SerializeField] private float hazardWarningDistance = 3.5f;  // 독성 안개보다 이만큼 앞에서 미리 경고 표시
     [SerializeField] private float padDetectRadius = 2.2f;        // 이 반경 안에 변환 패드가 있으면 패드 안내 표시
-    [SerializeField] private float breakableDetectRadius = 3f;    // 이 반경 안에 파괴 블록이 있으면 안내 표시
+    [SerializeField] private float breakableDetectRadius = 5f;    // 이 반경 안에 파괴 블록이 있으면 안내 표시
+    [SerializeField] private float breakableMinDisplayTime = 2f;  // 근처를 벗어나도 최소 이만큼은 유지한 뒤 사라짐
     [SerializeField] private float guideFadeSpeed = 6f;           // 안내 문구 페이드 인/아웃 속도
 
     [Header("상태별 특성 설명 (레벨당 한 번만, 일정 시간 표시 후 자동으로 사라짐)")]
@@ -67,6 +68,7 @@ public class GameHUD : MonoBehaviour
     private bool gasInfoShown;
     private int gasGuideLevelIndex = int.MinValue;       // 아직 계산 안 함(캐시 전) 표시값
     private int breakableGuideLevelIndex = int.MinValue; // 아직 계산 안 함(캐시 전) 표시값
+    private float breakableMinTimer;
     private GuideKind displayedGuide = GuideKind.None;
     private float infoGuideTimer;
 
@@ -155,6 +157,7 @@ public class GameHUD : MonoBehaviour
             solidInfoShown = false;
             gasInfoPending = false;
             gasInfoShown = false;
+            breakableMinTimer = 0f;
             levelStartX = playerTransform != null ? playerTransform.position.x : 0f;
             if (playerState != null)
                 lastObservedState = playerState.CurrentState;
@@ -228,7 +231,10 @@ public class GameHUD : MonoBehaviour
             desiredColor = GasColor;
         }
 
-        if (desired == GuideKind.None && breakableGuideEnabled && IsNearBreakableBlock())
+        if (breakableGuideEnabled && IsNearBreakableBlock())
+            breakableMinTimer = breakableMinDisplayTime; // 근처에 있는 동안은 계속 최대치로 채워둠
+
+        if (desired == GuideKind.None && breakableGuideEnabled && breakableMinTimer > 0f)
         {
             desired = GuideKind.BreakableInfo;
             desiredText = BreakableInfoMessage;
@@ -243,6 +249,10 @@ public class GameHUD : MonoBehaviour
             if (guideGroup.alpha >= 0.98f)
                 infoGuideTimer -= Time.deltaTime;
         }
+
+        // 파괴 블록 안내는 근처를 벗어난 뒤에도 최소 시간만큼은 계속 붙잡아둬서 너무 빨리 사라지지 않게 함
+        if (displayedGuide == GuideKind.BreakableInfo && breakableMinTimer > 0f)
+            breakableMinTimer -= Time.deltaTime;
 
         // --- 위험 요소 안내: 일반 대기열보다 항상 우선하며, 표시 중이던 일반 안내를 즉시 끊고 나타남 ---
         bool hazardActive = tutorialEnabled && IsToxicMistAhead();
