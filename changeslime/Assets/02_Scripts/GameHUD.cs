@@ -2,16 +2,16 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 전 레벨 공통 HUD(현재 상태 / 별 개수 / 재시작 안내)와, 1레벨(===LEVEL1=== 이후)에서만 표시되는
-/// 이동·점프·변환 패드 조작 가이드를 담당함. 기존 상태 전환·별 수집·레벨 전환 로직은 읽기만 하고
-/// 전혀 바꾸지 않음 — 화면에 그리는 것만 담당하는 순수 UI 레이어.
+/// 전 레벨 공통 HUD(현재 상태 / 별 개수 / 재시작 / 전체 맵 보기 안내)와, 특정 레벨에서만 한 번씩 표시되는
+/// 이동·점프 조작 안내 및 액체·고체·기체 상태별 특성 설명을 담당함. 기존 상태 전환·별 수집·레벨 전환
+/// 로직은 읽기만 하고 전혀 바꾸지 않음 — 화면에 그리는 것만 담당하는 순수 UI 레이어.
 /// </summary>
 public class GameHUD : MonoBehaviour
 {
-    [Header("이동/점프 안내를 보여줄 레벨 인덱스 (게임 내 표시 기준 1레벨)")]
+    [Header("이동/점프 안내 + 액체 특성 설명을 보여줄 레벨 인덱스 (게임 내 표시 기준 1레벨)")]
     [SerializeField] private int moveJumpGuideLevelIndex = 0;
 
-    [Header("변환 패드 안내를 보여줄 레벨 인덱스 (게임 내 표시 기준 2레벨, 첫 변환 블록 등장)")]
+    [Header("변환 패드 안내 + 고체 특성 설명을 보여줄 레벨 인덱스 (게임 내 표시 기준 2레벨, 첫 변환 블록 등장)")]
     [SerializeField] private int padGuideLevelIndex = 1;
 
     [Header("조작 가이드 감지 설정")]
@@ -20,7 +20,18 @@ public class GameHUD : MonoBehaviour
     [SerializeField] private float padDetectRadius = 2.2f;      // 이 반경 안에 변환 패드가 있으면 패드 안내 표시
     [SerializeField] private float guideFadeSpeed = 6f;         // 안내 문구 페이드 인/아웃 속도
 
-    private enum GuideKind { None, Move, Jump, Pad }
+    [Header("상태별 특성 설명 (처음 소개되는 레벨에서 한 번만, 일정 시간 표시 후 자동으로 사라짐)")]
+    [SerializeField] private float infoGuideDuration = 4f;
+
+    private enum GuideKind { None, Move, Jump, Pad, LiquidInfo, SolidInfo, GasInfo }
+
+    private static readonly Color LiquidColor = new Color(0.35f, 0.65f, 1f);   // 파란색 계열
+    private static readonly Color SolidColor = new Color(0.75f, 0.78f, 0.8f);  // 회색 계열
+    private static readonly Color GasColor = new Color(0.75f, 0.95f, 1f);      // 밝은 하늘색 계열
+
+    private const string LiquidInfoMessage = "액체: 점프할 수 있고 액체 통로를 통과합니다.\n전류 배관에 닿으면 재시작됩니다.";
+    private const string SolidInfoMessage = "고체: 느리고 점프할 수 없지만 전류에 안전합니다.\n높은 곳에서 떨어지면 파괴 블록을 부술 수 있습니다.";
+    private const string GasInfoMessage = "기체: 계속 위로 떠오르며 스스로 내려올 수 없습니다.\n기체 통로를 통과하지만 독성 안개에 닿으면 재시작됩니다.";
 
     private LevelManager levelManager;
     private CameraFollow cameraFollow;
@@ -36,12 +47,20 @@ public class GameHUD : MonoBehaviour
     private Text guideText;
     private CanvasGroup guideGroup;
 
-    private int lastLevelIndex = int.MinValue;
+    private int lastGenerationId = int.MinValue;
     private float levelStartX;
     private bool movedEnough;
+    private bool jumpConditionSeen;
     private SlimeState lastObservedState;
     private bool suppressPadGuide;
+    private bool liquidInfoShown;
+    private bool solidInfoPending;
+    private bool solidInfoShown;
+    private bool gasInfoPending;
+    private bool gasInfoShown;
+    private int gasGuideLevelIndex = int.MinValue; // 아직 계산 안 함(캐시 전) 표시값
     private GuideKind displayedGuide = GuideKind.None;
+    private float infoGuideTimer;
 
     private void Awake()
     {
@@ -85,15 +104,15 @@ public class GameHUD : MonoBehaviour
         {
             case SlimeState.Solid:
                 label = "고체";
-                color = new Color(0.75f, 0.78f, 0.8f); // 회색 계열
+                color = SolidColor;
                 break;
             case SlimeState.Gas:
                 label = "기체";
-                color = new Color(0.75f, 0.95f, 1f); // 밝은 하늘색 계열
+                color = GasColor;
                 break;
             default:
                 label = "액체";
-                color = new Color(0.35f, 0.65f, 1f); // 파란색 계열
+                color = LiquidColor;
                 break;
         }
 
@@ -109,51 +128,81 @@ public class GameHUD : MonoBehaviour
 
     private void UpdateGuide()
     {
-        int currentLevelIndex = levelManager != null ? levelManager.CurrentLevelIndex : int.MinValue;
+        if (gasGuideLevelIndex == int.MinValue)
+            gasGuideLevelIndex = levelManager != null ? levelManager.FirstLevelIndexContaining('G') : -1;
 
-        // 레벨이 바뀌면 이동/패드 안내 판단 기준값(시작 위치, 마지막으로 관찰한 상태)을 다시 잡음
-        if (currentLevelIndex != lastLevelIndex)
+        int currentLevelIndex = levelManager != null ? levelManager.CurrentLevelIndex : int.MinValue;
+        int generationId = StarManager.Instance != null ? StarManager.Instance.GenerationId : int.MinValue;
+
+        // 레벨이 (재)생성되면 — 다음 레벨로 넘어갈 때뿐 아니라 같은 레벨을 리스폰으로 다시 시작할 때도 —
+        // 조작 가이드 판단 기준값과 상태별 설명 표시 여부를 전부 다시 잡음
+        if (generationId != lastGenerationId)
         {
-            lastLevelIndex = currentLevelIndex;
+            lastGenerationId = generationId;
             movedEnough = false;
+            jumpConditionSeen = false;
             suppressPadGuide = false;
+            liquidInfoShown = false;
+            solidInfoPending = false;
+            solidInfoShown = false;
+            gasInfoPending = false;
+            gasInfoShown = false;
             levelStartX = playerTransform != null ? playerTransform.position.x : 0f;
             if (playerState != null)
                 lastObservedState = playerState.CurrentState;
         }
 
+        // 상태가 실제로 바뀐 순간을 감지 (기존 패드 안내를 끄는 것 + 상태별 설명을 예약하는 것 둘 다에 사용)
+        if (playerState.CurrentState != lastObservedState)
+        {
+            SlimeState newState = playerState.CurrentState;
+
+            if (newState == SlimeState.Solid && currentLevelIndex == padGuideLevelIndex && !solidInfoShown)
+                solidInfoPending = true;
+            if (newState == SlimeState.Gas && gasGuideLevelIndex >= 0 && currentLevelIndex == gasGuideLevelIndex && !gasInfoShown)
+                gasInfoPending = true;
+
+            suppressPadGuide = true;
+            lastObservedState = newState;
+        }
+
         bool moveJumpEnabled = currentLevelIndex == moveJumpGuideLevelIndex && playerTransform != null && playerMovement != null;
         bool padGuideEnabled = currentLevelIndex == padGuideLevelIndex && playerTransform != null;
+        bool gasGuideEnabled = gasGuideLevelIndex >= 0 && currentLevelIndex == gasGuideLevelIndex;
 
         GuideKind desired = GuideKind.None;
         string desiredText = null;
+        Color desiredColor = Color.white;
 
         if (moveJumpEnabled)
         {
             if (!movedEnough && Mathf.Abs(playerTransform.position.x - levelStartX) > moveGuideDistance)
                 movedEnough = true;
 
+            bool needsJump = playerMovement.IsGrounded && playerMovement.IsGroundAheadMissing(jumpAheadCheckDistance);
+            if (needsJump) jumpConditionSeen = true;
+
             if (!movedEnough)
             {
                 desired = GuideKind.Move;
                 desiredText = "A/D 또는 방향키로 이동";
             }
-            else if (playerMovement.IsGrounded && playerMovement.IsGroundAheadMissing(jumpAheadCheckDistance))
+            else if (needsJump)
             {
                 desired = GuideKind.Jump;
                 desiredText = "Space로 점프";
+            }
+            else if (!liquidInfoShown && jumpConditionSeen)
+            {
+                // 이동·점프 안내를 이미 한 번씩 겪은 뒤, 지금 당장 점프가 필요한 상황이 아닐 때 이어서 설명
+                desired = GuideKind.LiquidInfo;
+                desiredText = LiquidInfoMessage;
+                desiredColor = LiquidColor;
             }
         }
 
         if (desired == GuideKind.None && padGuideEnabled)
         {
-            // 상태가 실제로 바뀐 순간 패드 안내를 즉시 끔 (패드에서 벗어나야 다음 패드를 위해 다시 허용)
-            if (playerState.CurrentState != lastObservedState)
-            {
-                suppressPadGuide = true;
-                lastObservedState = playerState.CurrentState;
-            }
-
             bool nearPad = IsNearEnvironmentTrigger();
             if (suppressPadGuide && !nearPad)
                 suppressPadGuide = false;
@@ -163,6 +212,29 @@ public class GameHUD : MonoBehaviour
                 desired = GuideKind.Pad;
                 desiredText = "패드에 닿으면 상태가 변합니다";
             }
+            else if (solidInfoPending && !solidInfoShown)
+            {
+                desired = GuideKind.SolidInfo;
+                desiredText = SolidInfoMessage;
+                desiredColor = SolidColor;
+            }
+        }
+
+        if (desired == GuideKind.None && gasGuideEnabled && gasInfoPending && !gasInfoShown)
+        {
+            desired = GuideKind.GasInfo;
+            desiredText = GasInfoMessage;
+            desiredColor = GasColor;
+        }
+
+        // 상태별 설명은 한 번 표시되기 시작하면(페이드 인 도중 포함), 정해진 시간이 다 지나기 전까지는
+        // 위 판단과 무관하게 계속 붙잡아둠. 다 보인 뒤부터만 시간을 차감해서 "완전히 보이는 시간"이 약 infoGuideDuration초가 되게 함
+        bool displayingInfoGuide = displayedGuide == GuideKind.LiquidInfo || displayedGuide == GuideKind.SolidInfo || displayedGuide == GuideKind.GasInfo;
+        if (displayingInfoGuide && infoGuideTimer > 0f)
+        {
+            desired = displayedGuide;
+            if (guideGroup.alpha >= 0.98f)
+                infoGuideTimer -= Time.deltaTime;
         }
 
         bool shouldShow = desired != GuideKind.None;
@@ -174,6 +246,25 @@ public class GameHUD : MonoBehaviour
             {
                 displayedGuide = desired;
                 guideText.text = desiredText ?? string.Empty;
+                guideText.color = desiredColor;
+
+                switch (desired)
+                {
+                    case GuideKind.LiquidInfo:
+                        liquidInfoShown = true;
+                        infoGuideTimer = infoGuideDuration;
+                        break;
+                    case GuideKind.SolidInfo:
+                        solidInfoShown = true;
+                        solidInfoPending = false;
+                        infoGuideTimer = infoGuideDuration;
+                        break;
+                    case GuideKind.GasInfo:
+                        gasInfoShown = true;
+                        gasInfoPending = false;
+                        infoGuideTimer = infoGuideDuration;
+                        break;
+                }
             }
             else
             {
@@ -269,6 +360,7 @@ public class GameHUD : MonoBehaviour
         guideText.alignment = TextAnchor.MiddleCenter;
         guideText.color = Color.white;
         guideText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        guideText.verticalOverflow = VerticalWrapMode.Overflow; // 상태별 설명은 두 줄이라 잘리지 않도록 함
 
         Outline outline = guideObj.AddComponent<Outline>();
         outline.effectColor = new Color(0f, 0f, 0f, 0.8f);
@@ -279,7 +371,7 @@ public class GameHUD : MonoBehaviour
         guideRect.anchorMax = new Vector2(0.5f, 0f);
         guideRect.pivot = new Vector2(0.5f, 0f);
         guideRect.anchoredPosition = new Vector2(0f, 90f);
-        guideRect.sizeDelta = new Vector2(950f, 76f);
+        guideRect.sizeDelta = new Vector2(950f, 120f);
     }
 
     private Text CreateHudText(Transform parent, Font font, string name, Vector2 anchor, Vector2 pivot,

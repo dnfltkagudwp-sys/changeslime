@@ -28,7 +28,7 @@ public class LevelManager : MonoBehaviour
     private SlimeStateController playerState;
     private Text levelLabel;
 
-    /// <summary>현재 로드된 레벨의 인덱스 (0=시작 전 프롤로그, 1="===LEVEL1===" 이후의 1레벨). HUD 등 외부에서 읽기 전용으로 참조.</summary>
+    /// <summary>현재 로드된 레벨의 내부 인덱스(0부터 시작). 플레이어에게 보여줄 때는 +1한 값을 사용함. HUD 등 외부에서 읽기 전용으로 참조.</summary>
     public int CurrentLevelIndex => currentLevelIndex;
 
     /// <summary>
@@ -66,9 +66,26 @@ public class LevelManager : MonoBehaviour
         if (playerState != null)
             playerState.ChangeState(SlimeState.Liquid);
 
-        // ===LEVEL N=== 구분자 번호, Start Level Index 필드와 숫자를 그대로 맞추기 위해 0부터 표기
+        // 플레이어에게는 내부 인덱스가 아니라 1부터 시작하는 레벨 번호로 표시함
         if (levelLabel != null)
-            levelLabel.text = $"Level {currentLevelIndex} (index) / max {levelTexts.Length - 1}";
+            levelLabel.text = $"레벨 {currentLevelIndex + 1} / {levelTexts.Length}";
+    }
+
+    /// <summary>
+    /// levelTexts 중 특정 타일 문자가 처음 등장하는 레벨의 인덱스를 찾음 (없으면 -1).
+    /// 어느 레벨에 특정 오브젝트가 처음 나오는지를 맵 텍스트를 하드코딩하지 않고 그때그때 확인하기 위한 용도.
+    /// </summary>
+    public int FirstLevelIndexContaining(char tile)
+    {
+        if (levelTexts == null) return -1;
+
+        for (int i = 0; i < levelTexts.Length; i++)
+        {
+            if (levelTexts[i].IndexOf(tile) >= 0)
+                return i;
+        }
+
+        return -1;
     }
 
     /// <summary>

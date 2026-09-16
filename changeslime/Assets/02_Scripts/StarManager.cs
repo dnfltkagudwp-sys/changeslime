@@ -42,6 +42,12 @@ public class StarManager : MonoBehaviour
     /// <summary>현재 레벨에서 모은 별 개수. HUD 등 외부에서 읽기 전용으로 참조.</summary>
     public int CollectedStars => collectedStars;
 
+    /// <summary>
+    /// 맵이 (재)생성될 때마다 하나씩 증가함 — 다음 레벨로 넘어갈 때뿐 아니라 같은 레벨을 리스폰으로
+    /// 다시 시작할 때도 늘어나므로, GameHUD가 "레벨이 새로 시작됐다"를 감지하는 용도로 참조.
+    /// </summary>
+    public int GenerationId { get; private set; }
+
     private void Awake()
     {
         Instance = this;
@@ -58,6 +64,7 @@ public class StarManager : MonoBehaviour
         totalStars = count;
         collectedStars = 0;
         cleared = false;
+        GenerationId++;
     }
 
     public void CollectStar()
