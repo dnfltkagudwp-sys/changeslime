@@ -23,6 +23,7 @@ public class GameHUD : MonoBehaviour
     private enum GuideKind { None, Move, Jump, Pad }
 
     private LevelManager levelManager;
+    private CameraFollow cameraFollow;
     private SlimeStateController playerState;
     private SlimeMovement playerMovement;
     private PlayerRespawn playerRespawn;
@@ -31,6 +32,7 @@ public class GameHUD : MonoBehaviour
     private Text stateText;
     private Text starText;
     private Text restartText;
+    private Text mapViewText;
     private Text guideText;
     private CanvasGroup guideGroup;
 
@@ -44,6 +46,7 @@ public class GameHUD : MonoBehaviour
     private void Awake()
     {
         levelManager = FindAnyObjectByType<LevelManager>();
+        cameraFollow = FindAnyObjectByType<CameraFollow>();
         CachePlayerReferences();
         BuildUI();
     }
@@ -221,23 +224,32 @@ public class GameHUD : MonoBehaviour
         // 좌측 상단: 현재 상태 (LevelManager의 디버그용 레벨 라벨이 이미 좌측 상단 맨 위를 쓰고 있어 그 아래에 배치)
         stateText = CreateHudText(canvasObj.transform, font, "StateText",
             anchor: new Vector2(0f, 1f), pivot: new Vector2(0f, 1f),
-            anchoredPosition: new Vector2(24f, -74f), sizeDelta: new Vector2(420f, 46f),
-            alignment: TextAnchor.UpperLeft, fontSize: 30, color: Color.white);
+            anchoredPosition: new Vector2(24f, -76f), sizeDelta: new Vector2(440f, 52f),
+            alignment: TextAnchor.UpperLeft, fontSize: 34, color: Color.white);
 
         // 중앙 상단: 별 개수
         starText = CreateHudText(canvasObj.transform, font, "StarText",
             anchor: new Vector2(0.5f, 1f), pivot: new Vector2(0.5f, 1f),
-            anchoredPosition: new Vector2(0f, -24f), sizeDelta: new Vector2(300f, 46f),
-            alignment: TextAnchor.UpperCenter, fontSize: 32, color: Color.white);
+            anchoredPosition: new Vector2(0f, -26f), sizeDelta: new Vector2(320f, 52f),
+            alignment: TextAnchor.UpperCenter, fontSize: 36, color: Color.white);
 
         // 우측 상단: 재시작 안내 (다른 HUD보다 작고 흐리게, 낮은 우선순위)
         restartText = CreateHudText(canvasObj.transform, font, "RestartHintText",
             anchor: new Vector2(1f, 1f), pivot: new Vector2(1f, 1f),
-            anchoredPosition: new Vector2(-20f, -18f), sizeDelta: new Vector2(180f, 34f),
-            alignment: TextAnchor.UpperRight, fontSize: 20, color: new Color(1f, 1f, 1f, 0.6f));
+            anchoredPosition: new Vector2(-20f, -20f), sizeDelta: new Vector2(200f, 38f),
+            alignment: TextAnchor.UpperRight, fontSize: 23, color: new Color(1f, 1f, 1f, 0.6f));
 
         string restartKey = playerRespawn != null ? playerRespawn.RespawnKey.ToString() : "R";
         restartText.text = $"{restartKey} 재시작";
+
+        // 재시작 안내 바로 아래에 같은 우선순위로 배치
+        mapViewText = CreateHudText(canvasObj.transform, font, "MapViewHintText",
+            anchor: new Vector2(1f, 1f), pivot: new Vector2(1f, 1f),
+            anchoredPosition: new Vector2(-20f, -58f), sizeDelta: new Vector2(200f, 38f),
+            alignment: TextAnchor.UpperRight, fontSize: 23, color: new Color(1f, 1f, 1f, 0.6f));
+
+        string mapViewKey = cameraFollow != null ? cameraFollow.FullMapViewKey.ToString() : "Tab";
+        mapViewText.text = $"{mapViewKey} 전체 맵 보기";
 
         // 하단 중앙: 1레벨 전용 조작 가이드 (평소엔 투명, 필요할 때만 페이드 인)
         GameObject guideObj = new GameObject("GuideText");

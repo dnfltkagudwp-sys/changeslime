@@ -23,6 +23,9 @@ public class CameraFollow : MonoBehaviour
     [Header("전체 맵 보기 (키를 누르고 있는 동안 맵 전체가 보이도록 줌아웃)")]
     [SerializeField] private MapGenerator mapGenerator; // 비워두면 씬에서 자동으로 찾음
     [SerializeField] private KeyCode fullMapViewKey = KeyCode.Tab;
+
+    /// <summary>전체 맵 보기 단축키. HUD 안내 문구가 실제 설정값과 어긋나지 않도록 외부에서 읽기 전용으로 참조.</summary>
+    public KeyCode FullMapViewKey => fullMapViewKey;
     [SerializeField] private float fullMapPadding = 1f;
     [SerializeField] private float zoomSmoothTime = 0.25f;
 

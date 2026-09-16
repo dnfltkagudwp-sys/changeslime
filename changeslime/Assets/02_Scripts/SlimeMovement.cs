@@ -12,6 +12,9 @@ public class SlimeMovement : MonoBehaviour
     [SerializeField] private float checkRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
+    [Header("바닥에 닿았을 때 살짝 떠 보이는 현상 보정")]
+    [SerializeField] private float visualGroundBias = 0.02f; // 물리 엔진이 남기는 미세한 접촉 간격(Contact Offset)만큼 비주얼을 더 내려서 보정
+
     [Header("슬라임 탄성 연출 (Squash & Stretch)")]
     [SerializeField] private Transform visualTransform; // 크기가 변형될 스프라이트 오브젝트
     [SerializeField] private float stretchSpeed = 10f;
@@ -114,7 +117,7 @@ public class SlimeMovement : MonoBehaviour
         SpriteRenderer sr = visualTransform.GetComponent<SpriteRenderer>();
         if (sr == null || sr.sprite == null || col == null) return;
 
-        float bottomCorrection = col.bounds.min.y - sr.bounds.min.y;
+        float bottomCorrection = col.bounds.min.y - sr.bounds.min.y - visualGroundBias;
         visualTransform.position += new Vector3(0f, bottomCorrection, 0f);
         originalLocalPosition = visualTransform.localPosition;
     }
