@@ -31,7 +31,7 @@ public class GameHUD : MonoBehaviour
     private enum GuideKind { None, Move, ToxicJumpWarning, Pad, BreakableInfo, LiquidInfo, SolidInfo, GasInfo }
 
     private static readonly Color LiquidColor = new Color(0.35f, 0.65f, 1f);   // 파란색 계열
-    private static readonly Color SolidColor = new Color(0.75f, 0.78f, 0.8f);  // 회색 계열
+    private static readonly Color SolidColor = new Color(0.55f, 0.58f, 0.63f); // 회색 계열 (흰색과 헷갈리지 않도록 좀 더 진하게)
     private static readonly Color GasColor = new Color(0.75f, 0.95f, 1f);      // 밝은 하늘색 계열
 
     private const string MoveMessage = "A/D 또는 방향키로 이동";
